@@ -131,8 +131,9 @@ TEMPLATE = """<!DOCTYPE html>
 """
 
 
-def main():
-    os.makedirs(WORKS_DIR, exist_ok=True)
+def main(out_root=None):
+    works_dir = os.path.join(out_root, "works") if out_root else WORKS_DIR
+    os.makedirs(works_dir, exist_ok=True)
     for slug, fname, cover, medium, latin in WORKS:
         path = os.path.join(LABEL_DIR, fname)
         with open(path, "r", encoding="utf-8", errors="replace") as f:
@@ -156,7 +157,7 @@ def main():
             body=md_to_html(body),
             source=html.escape(fname),
         )
-        out_dir = os.path.join(WORKS_DIR, slug)
+        out_dir = os.path.join(works_dir, slug)
         os.makedirs(out_dir, exist_ok=True)
         with open(os.path.join(out_dir, "index.html"), "w", encoding="utf-8") as f:
             f.write(page)

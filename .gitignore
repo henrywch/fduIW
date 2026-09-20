@@ -1,6 +1,8 @@
+dist/
 tools/.test/node_modules/
 tools/.test/package.json
 tools/.test/package-lock.json
 *.log
 .DS_Store
 Thumbs.db
+__pycache__/

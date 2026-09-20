@@ -197,8 +197,10 @@ not the front door.
 
 ### Setup notes
 
-1. Push the built site from CI (GitHub Actions, free for public repos) to EdgeOne Pages; keep
-   GitHub Pages publishing the same artifact as a no-maintenance overseas mirror.
+1. EdgeOne Pages connects the GitHub repo directly. Build command: `python tools/build.py`;
+   output directory: `dist/`. The pipeline assembles a whitelist-only public tree (pages,
+   css/js, images, regenerated chapbooks) so raw sources in `assets/label|source`, tooling,
+   and `designs/` never reach the edge. GitHub Pages can mirror the same `dist/` via CI.
 2. Custom domain (optional, ~¥30–60/yr for a `.top`/`.xyz`): point CN users at EdgeOne, or later
    split DNS by region. Without an ICP licence stay on the free `*.edgeone.app`-style subdomain.
 3. HTTPS everywhere via the platform's managed certificates; enforce HSTS at the edge.
