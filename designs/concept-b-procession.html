@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>朝圣 · 手抄本之旅 — Concept B</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:ital@0;1&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root { --gold:#C9A45C; --green:#5F7F59; --red:#B2543E; --ink:#2A2620; --paper:#F7F3EA; }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--paper); color: var(--ink); font-family: "Noto Serif SC", serif; overflow-x: hidden; }
+  body::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 99; opacity: .05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  }
+
+  /* scroll progress rosary */
+  #progress { position: fixed; left: 1.6rem; top: 50%; transform: translateY(-50%); z-index: 50; display: flex; flex-direction: column; gap: 14px; }
+  #progress i { width: 9px; height: 9px; border-radius: 50%; border: 1px solid var(--gold); transition: background .35s, transform .35s; }
+  #progress i.lit { background: var(--gold); transform: scale(1.35); }
+
+  header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 20; padding: 1rem 2rem;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: "JetBrains Mono", monospace; font-size: .7rem; letter-spacing: .2em; color: #6B6252;
+    background: linear-gradient(rgba(247,243,234,.92), transparent);
+  }
+  header a { color: var(--gold); text-decoration: none; }
+
+  /* hero: giant kinetic display lines */
+  .hero { min-height: 130vh; display: flex; flex-direction: column; justify-content: center; padding: 0 8vw; }
+  .kl {
+    font-size: clamp(3.2rem, 10vw, 8rem); font-weight: 600; line-height: 1.12; letter-spacing: .06em;
+    color: var(--ink); will-change: transform, opacity;
+  }
+  .kl em { font-style: normal; color: var(--gold); }
+  .kl.L2 { color: var(--green); font-size: clamp(2rem, 6vw, 4.6rem); }
+  .kl.L3 { font-family: "Cormorant Garamond", serif; font-weight: 400; font-style: italic; color: #6B6252; font-size: clamp(1.1rem, 2.6vw, 1.9rem); letter-spacing: .2em; margin-top: 1.6rem; }
+
+  /* latin marquee band */
+  .band {
+    border-top: 1px solid rgba(201,164,92,.4); border-bottom: 1px solid rgba(201,164,92,.4);
+    overflow: hidden; white-space: nowrap; padding: .8rem 0; background: rgba(201,164,92,.06);
+  }
+  .band span {
+    display: inline-block; padding-right: 3rem; font-family: "Cormorant Garamond", serif;
+    font-size: 1.05rem; letter-spacing: .3em; color: #92500A; animation: slide 26s linear infinite; will-change: transform;
+  }
+  .band span:nth-child(2) { animation-delay: -13s; }
+  @keyframes slide { to { transform: translateX(-100%); } }
+
+  /* parallax cloister arches flanking a text column */
+  .cloister { position: relative; padding: 18vh 8vw; }
+  .arch-col { position: absolute; top: 0; bottom: 0; width: 17vw; display: flex; flex-direction: column; justify-content: space-around; pointer-events: none; }
+  .arch-col.left { left: -3vw; } .arch-col.right { right: -3vw; }
+  .arch-col svg { width: 100%; stroke: var(--gold); fill: none; stroke-width: 1; opacity: .5; will-change: transform; }
+  .cloister article { max-width: 620px; margin: 0 auto; }
+  .cloister h2 { color: var(--gold); letter-spacing: .3em; font-size: 1.5rem; margin-bottom: 1.6rem; }
+  .cloister p { line-height: 2.3; text-align: justify; margin-bottom: 1.2rem; color: #4a4439; }
+  .dropline { display: block; overflow: hidden; }
+  .dropline span { display: block; transform: translateY(110%); transition: transform 1s cubic-bezier(.19,1,.22,1); }
+  .on .dropline span { transform: none; }
+  .on .dropline:nth-child(2) span { transition-delay: .12s; }
+  .on .dropline:nth-child(3) span { transition-delay: .24s; }
+
+  /* horizontal snap gallery of arch cards with svg gold stroke draw */
+  #hwrap { overflow-x: auto; scroll-snap-type: x mandatory; display: flex; gap: 2rem; padding: 10vh 10vw; scrollbar-width: none; }
+  #hwrap::-webkit-scrollbar { display: none; }
+  .door {
+    scroll-snap-align: center; flex: 0 0 min(78vw, 460px);
+    border-radius: 230px 230px 16px 16px; background: #fff; border: 1px solid rgba(201,164,92,.35);
+    padding: 3.4rem 2.2rem 2.4rem; text-align: center; position: relative;
+    box-shadow: 0 6px 30px rgba(42,38,32,.07);
+  }
+  .door svg.ring { position: absolute; inset: 10px; width: calc(100% - 20px); height: calc(100% - 20px); pointer-events: none; }
+  .door svg.ring rect { fill: none; stroke: var(--gold); stroke-width: 1.2; stroke-dasharray: 3000; stroke-dashoffset: 3000; transition: stroke-dashoffset 2.2s ease .2s; }
+  .door.on svg.ring rect { stroke-dashoffset: 0; }
+  .door h3 { color: var(--ink); font-size: 1.3rem; margin: .8rem 0 .3rem; }
+  .door .meta { font-family: "JetBrains Mono", monospace; font-size: .68rem; letter-spacing: .15em; color: #6B6252; }
+  .door p { color: #6B6252; font-size: .9rem; line-height: 1.9; margin-top: .8rem; }
+  .door img { width: 100%; max-height: 180px; object-fit: cover; border-radius: 90px 90px 8px 8px; }
+
+  footer { text-align: center; padding: 4rem 0 5rem; color: #6B6252; font-family: "JetBrains Mono", monospace; font-size: .68rem; letter-spacing: .2em; }
+</style>
+</head>
+<body>
+
+<div id="progress" aria-hidden="true"><i class="lit"></i><i></i><i></i><i></i><i></i></div>
+
+<header>
+  <span>MSS · ANNO 2024</span>
+  <a href="index.html">← MOTION LAB</a>
+</header>
+
+<section class="hero">
+  <h1 class="kl L1">乐园搁浅于<em>不毛之地</em>，</h1>
+  <h1 class="kl L2">而花仍开</h1>
+  <p class="kl L3">· HORTUS DE ESCAPISMO · A WALK THROUGH THE ILLUMINATED PAGES ·</p>
+</section>
+
+<div class="band" aria-hidden="true">
+  <span>PARADISUS IN EREMO · LEX DAT · SENSUS CONIUNGIT · FLORES MANENT · FIDES FLORET · PARADISUS IN EREMO · LEX DAT · SENSUS CONIUNGIT · FLORES MANENT · FIDES FLORET ·&nbsp;</span>
+  <span>PARADISUS IN EREMO · LEX DAT · SENSUS CONIUNGIT · FLORES MANENT · FIDES FLORET · PARADISUS IN EREMO · LEX DAT · SENSUS CONIUNGIT · FLORES MANENT · FIDES FLORET ·&nbsp;</span>
+</div>
+
+<section class="cloister">
+  <div class="arch-col left" aria-hidden="true">
+    <svg viewBox="0 0 100 160"><path d="M10 150 V60 Q50 10 90 60 V150 M25 150 V70 Q50 40 75 70 V150"/></svg>
+    <svg viewBox="0 0 100 160"><path d="M10 150 V60 Q50 10 90 60 V150 M25 150 V70 Q50 40 75 70 V150"/></svg>
+  </div>
+  <div class="arch-col right" aria-hidden="true">
+    <svg viewBox="0 0 100 160"><path d="M10 150 V60 Q50 20 90 60 V150 M25 150 V70 Q50 40 75 70 V150"/></svg>
+    <svg viewBox="0 0 100 160"><path d="M10 150 V60 Q50 20 90 60 V150 M25 150 V70 Q50 40 75 70 V150"/></svg>
+  </div>
+  <article id="chap1">
+    <h2>卷一 · 启程</h2>
+    <p class="dropline"><span>费德里科受封为圣徒之日的第一个任务，</span></p>
+    <p class="dropline"><span>是去寻找一座失踪六十年的移动修道院。</span></p>
+    <p class="dropline"><span>圣地派出使者，使者失去音讯。</span></p>
+    <p class="dropline"><span>于是年轻的圣徒独自上路——</span></p>
+    <p class="dropline"><span>滚动，即是你的朝圣。</span></p>
+  </article>
+</section>
+
+<section class="cloister">
+  <article id="chap2" style="text-align:center">
+    <h2>卷二 · 回廊四作</h2>
+    <p style="text-align:center;color:#6B6252;font-size:.9rem">横向推开回廊的每一扇门 —— scroll or drag sideways</p>
+  </article>
+</section>
+
+<div id="hwrap">
+  <div class="door">
+    <svg class="ring" viewBox="0 0 100 100" preserveAspectRatio="none"><rect x="2" y="2" width="96" height="96" rx="46"/></svg>
+    <img src="../assets/image/杭城十二时辰-窗格.jpg" alt="杭城十二时辰">
+    <h3>杭城十二时辰</h3><div class="meta">NOVEL · 魔王与小玖 · 奇幻</div>
+    <p>网吧深夜的法器骤暗，青民之城亮起十二时辰的警讯。小说节双奖之作。</p>
+  </div>
+  <div class="door">
+    <svg class="ring" viewBox="0 0 100 100" preserveAspectRatio="none"><rect x="2" y="2" width="96" height="96" rx="46"/></svg>
+    <img src="../assets/image/cyber-fortune-telling.png" alt="你算命了吗">
+    <h3>你算命了吗</h3><div class="meta">NOVEL · 旁观的好孩子 · 科幻</div>
+    <p>拉普拉斯之神注视之下，一次算命成了决定论的裂缝。</p>
+  </div>
+  <div class="door">
+    <svg class="ring" viewBox="0 0 100 100" preserveAspectRatio="none"><rect x="2" y="2" width="96" height="96" rx="46"/></svg>
+    <img src="../assets/image/midnight-broadcast.jpg" alt="婺城午夜电台札记">
+    <h3>婺城午夜电台札记</h3><div class="meta">NOVEL · 林子环 · 悬疑</div>
+    <p>午夜电台播报失踪案，主持人发现信号比真相更诚实。</p>
+  </div>
+  <div class="door">
+    <svg class="ring" viewBox="0 0 100 100" preserveAspectRatio="none"><rect x="2" y="2" width="96" height="96" rx="46"/></svg>
+    <img src="../assets/image/sunset-factory.jpg" alt="白银时代">
+    <h3>白银时代</h3><div class="meta">NOVEL · 浮光 · 故事</div>
+    <p>十六座工厂一百零七个车间，恋盲症在流水线间蔓延。</p>
+  </div>
+</div>
+
+<section class="cloister">
+  <article id="chap3">
+    <h2>终卷 · 共感</h2>
+    <p class="dropline"><span>页面读尽，如圣徒归城。</span></p>
+    <p class="dropline"><span>你走过的每一屏都被念珠记下，</span></p>
+    <p class="dropline"><span>如萨科塔的光环不因远行而熄灭。</span></p>
+    <p class="dropline"><span>——我们园子里见。</span></p>
+  </article>
+</section>
+
+<footer>CONCEPT B · SCROLL-LINKED LERP · LINE-RISE TYPE · MARQUEE · PARALLAX ARCHES · SVG DASH DRAW</footer>
+
+<script>
+(function () {
+  "use strict";
+  var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- scroll-linked lerp engine (Lenis-lite for effects) ---------- */
+  var scrollY = window.scrollY, eased = scrollY;
+  if (!reduced) (function pump() {
+    eased += (window.scrollY - eased) * 0.12;
+    // kinetic hero lines: drift apart at different velocities
+    var L1 = document.querySelector(".kl.L1"), L2 = document.querySelector(".kl.L2"), L3 = document.querySelector(".kl.L3");
+    if (L1) {
+      L1.style.transform = "translateY(" + -eased * 0.18 + "px)";
+      L1.style.opacity = Math.max(0, 1 - eased / 700);
+      L2.style.transform = "translateY(" + -eased * 0.34 + "px)";
+      L2.style.opacity = Math.max(0, 1 - eased / 800);
+      L3.style.transform = "translateY(" + -eased * 0.07 + "px)";
+    }
+    // parallax arches: columns drift at counter speeds
+    var left = document.querySelector(".arch-col.left"), right = document.querySelector(".arch-col.right");
+    if (left) {
+      left.style.transform = "translateY(" + eased * 0.06 + "px) rotate(-2deg)";
+      right.style.transform = "translateY(" + -eased * 0.08 + "px) rotate(2deg)";
+    }
+    requestAnimationFrame(pump);
+  })();
+
+  /* ---------- progress rosary: dots light with scroll ---------- */
+  var beads = document.querySelectorAll("#progress i");
+  var marks = document.querySelectorAll(".hero, .cloister, #hwrap");
+  function rosary() {
+    var vh = innerHeight;
+    marks.forEach(function (m, i) {
+      if (beads[i] && m.getBoundingClientRect().top < vh * 0.6) beads[i].classList.add("lit");
+    });
+  }
+  addEventListener("scroll", rosary, { passive: true }); rosary();
+
+  /* ---------- line-rise reveal ---------- */
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("on"); io.unobserve(e.target); } });
+  }, { threshold: 0.35 });
+  document.querySelectorAll(".cloister article, .door").forEach(function (el) { io.observe(el); });
+
+  /* ---------- doors: make the horizontal strip also follow vertical scroll slightly ---------- */
+  var hwrap = document.getElementById("hwrap");
+  if (!reduced) addEventListener("wheel", function (e) {
+    var r = hwrap.getBoundingClientRect();
+    if (r.top < innerHeight * 0.55 && r.bottom > innerHeight * 0.45
+        && hwrap.scrollWidth > hwrap.clientWidth
+        && ((e.deltaY > 0 && hwrap.scrollLeft + hwrap.clientWidth < hwrap.scrollWidth - 4)
+         || (e.deltaY < 0 && hwrap.scrollLeft > 4))) {
+      e.preventDefault();
+      hwrap.scrollLeft += e.deltaY;
+    }
+  }, { passive: false });
+})();
+</script>
+</body>
+</html>

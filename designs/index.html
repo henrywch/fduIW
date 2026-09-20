@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>设计实验室 · 空想花庭</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root { --gold:#C9A45C; --green:#5F7F59; --red:#B2543E; --ink:#2A2620; --paper:#F7F3EA; --night:#161A26; }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    font-family: "Noto Serif SC", "Songti SC", serif;
+    background: var(--night);
+    color: #E8E2D4;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+    background-image: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(201,164,92,.12), transparent 60%);
+  }
+  .halo-svg { width: 44px; height: 44px; animation: spin 24s linear infinite; }
+  .halo-svg ellipse { fill: none; stroke: var(--gold); stroke-width: 1.4; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  h1 { font-size: clamp(1.8rem, 5vw, 3rem); letter-spacing: .2em; color: var(--gold); margin: 1.4rem 0 .4rem; font-weight: 600; }
+  .sub { font-family: "Cormorant Garamond", serif; letter-spacing: .4em; color: #9A927E; font-size: .95rem; }
+  .note { max-width: 640px; text-align: center; color: #B8AF9C; line-height: 2; margin: 2rem 0 3rem; font-size: .95rem; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.4rem; max-width: 1080px; width: 100%; }
+  a.concept {
+    display: block; text-decoration: none; color: #E8E2D4;
+    border: 1px solid rgba(224,192,122,.28); border-radius: 14px;
+    background: #1E2334; padding: 2rem 1.6rem; position: relative; overflow: hidden;
+    transition: transform .3s ease, border-color .3s ease;
+  }
+  a.concept:hover { transform: translateY(-6px); border-color: var(--gold); }
+  a.concept::before {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(400px circle at var(--mx, 50%) var(--my, 50%), rgba(224,192,122,.14), transparent 40%);
+    opacity: 0; transition: opacity .3s; pointer-events: none;
+  }
+  a.concept:hover::before { opacity: 1; }
+  .tag { font-family: monospace; font-size: .7rem; letter-spacing: .15em; color: var(--green); text-transform: uppercase; }
+  h2 { font-size: 1.35rem; margin: .6rem 0; color: #E8E2D4; }
+  p { color: #9A927E; font-size: .9rem; line-height: 1.9; }
+  .tech { margin-top: 1rem; font-family: monospace; font-size: .72rem; color: #6B6252; line-height: 1.8; }
+  .back { margin-top: 3rem; color: #6B6252; font-size: .85rem; }
+  .back a { color: var(--gold); }
+</style>
+</head>
+<body>
+
+<svg class="halo-svg" viewBox="0 0 64 64" aria-hidden="true">
+  <ellipse cx="32" cy="32" rx="26" ry="10" transform="rotate(-18 32 32)"/>
+  <ellipse cx="32" cy="32" rx="18" ry="6.5" transform="rotate(14 32 32)" opacity=".45"/>
+</svg>
+<h1>设计实验室</h1>
+<div class="sub">MOTION LAB · HORTUS DE ESCAPISMO</div>
+
+<p class="note">三个概念页面，各自探索一组当下前沿的网页动效技术，并将其转译进「空想花庭」的语境——<br>
+移动修道院、花窗之光、搁浅于荒野的花园、律法与共感。<em>鼠标移动、滚动、悬停皆可交互。</em></p>
+
+<div class="cards">
+
+  <a class="concept" href="concept-a-vigil.html">
+    <span class="tag">Concept A · 夜祷 VIGIL</span>
+    <h2>搁浅之夜 · The Stranded Abbey</h2>
+    <p>深夜中的修道院：WebGL 噪声花窗光在幕布上流动，光环随鼠标摇晃，花瓣在静默中飘落。主标题逐字自夜色中升起。</p>
+    <div class="tech">fbm value-noise fragment shader · canvas petals · split-char kinetic title · text-scramble · halo parallax cursor</div>
+  </a>
+
+  <a class="concept" href="concept-b-procession.html">
+    <span class="tag">Concept B · 朝圣 PROCESSION</span>
+    <h2>手抄本之旅 · The Illuminated Walk</h2>
+    <p>白昼的手抄本：滚动即朝圣。标题逐行抬高觉醒，拉丁文饰带横向流转，回廊拱券随视差位移，金线描边的回廊卡片横向展开。</p>
+    <div class="tech">scroll-linked lerp engine · line-rise typography · marquee band · parallax arches · svg dash draw · snap horizontal gallery</div>
+  </a>
+
+  <a class="concept" href="concept-c-garden.html">
+    <span class="tag">Concept C · 花墙 HORTUS</span>
+    <h2>自由花墙 · The Living Wall</h2>
+    <p>作品如花在墙：磁吸悬停令花瓣张开，花名以字符扰乱再译出真名，指尖经过处拖出一道花粉轨迹。品类筛选用花种作喻。</p>
+    <div class="tech">magnetic 3d tilt · text-scramble decode · pollen cursor trail · svg stroke draw · layout morph on filter</div>
+  </a>
+
+</div>
+
+<div class="back">返回 <a href="../index.html">主站首页</a> · 设计文档见 <a href="../PLAN.md">PLAN.md</a></div>
+
+<script>
+// spotlight cards: track cursor position per card
+document.querySelectorAll('a.concept').forEach(function (c) {
+  c.addEventListener('pointermove', function (e) {
+    var r = c.getBoundingClientRect();
+    c.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+    c.style.setProperty('--my', (e.clientY - r.top) + 'px');
+  });
+});
+</script>
+</body>
+</html>

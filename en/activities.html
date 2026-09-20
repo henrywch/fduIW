@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Chronicle · Hortus de Escapismo</title>
+<meta name="description" content="Fiction festivals, joint projects and lectures: the monastery's chronicle.">
+<link rel="stylesheet" href="../css/site.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:ital@0;1&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<script>
+(function(){var t=localStorage.getItem("hds-theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.documentElement.setAttribute("data-theme",t);})();
+</script>
+</head>
+<body>
+
+<canvas id="pollen" aria-hidden="true"></canvas>
+
+<header class="site-header">
+  <a class="brand" href="index.html">
+    <svg class="halo" viewBox="0 0 32 32" aria-hidden="true"><ellipse cx="16" cy="16" rx="13" ry="5.5" transform="rotate(-18 16 16)"/></svg>
+    <span class="latin">Hortus de Escapismo</span>
+  </a>
+  <nav class="site-nav">
+    <a href="index.html">About</a>
+    <a href="members.html">Friars</a>
+    <a href="activities.html" class="active">Chronicle</a>
+    <a href="works.html">Garden</a>
+    <div class="toggles">
+      <a class="toggle-btn" href="../activities.html">中</a>
+      <button class="toggle-btn" id="theme-toggle" type="button" aria-label="toggle day/night">◐</button>
+    </div>
+  </nav>
+</header>
+
+<div class="wall-page">
+
+  <div class="wall-head">
+    <h1 class="latin" data-scramble="The Chronicle">The Chronicle</h1>
+    <div class="wall-latin">活动志 · CHRONICLE</div>
+    <svg id="vine" viewBox="0 0 420 40" aria-hidden="true">
+      <path d="M10 30 C60 5 90 35 140 20 S240 5 290 22 S380 30 410 14 M70 24 q4 -10 12 -8 M210 18 q4 10 12 8 M330 22 q-6 -8 2 -14"/>
+    </svg>
+    <p class="mono meta">CHRONICLE · the house's great affairs, by year</p>
+  </div>
+
+  <div class="chronicle">
+
+    <div class="chron-item ongoing">
+      <div class="living" style="display:block;cursor:default">
+        <div class="stem" style="padding:1.3rem 1.4rem 1.5rem">
+          <span class="mono meta">Ongoing · year-round</span>
+          <h3 style="margin:.35rem 0" class="latin">Open submissions<span class="badge-halo">ongoing</span></h3>
+          <p>Novels, paintings, OCs, worldbuilding — any form. After the gardeners' cataloguing it is hung in <a href="works.html">the Garden</a>. See the WeChat backstage for how to submit.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="chron-item">
+      <div class="living" style="display:block;cursor:default">
+        <div class="stem" style="padding:1.3rem 1.4rem 1.5rem">
+          <span class="mono meta">2024-06-01 · Fiction Festival</span>
+          <h3 style="margin:.35rem 0" class="latin">1st "Gushihui" Fiction Festival — awards</h3>
+          <p>The four prizes found their owners:</p>
+          <ul style="margin:.2rem 0;font-size:.95rem;color:var(--ink-soft)">
+            <li>Best Fantasy / Most Promising · 《杭城十二时辰》 — 魔王与小玖</li>
+            <li>Best Sci-fi · 《你算命了吗》 — 旁观的好孩子</li>
+            <li>Best Mystery · 《婺城午夜电台札记》 — 林子环</li>
+            <li>Best Story / Best Characters · 《白银时代》 — 浮光</li>
+          </ul>
+          <p style="margin-bottom:0"><a href="works.html">To the Garden →</a></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="chron-item">
+      <div class="living" style="display:block;cursor:default">
+        <div class="stem" style="padding:1.3rem 1.4rem 1.5rem">
+          <span class="mono meta">2024-05 · Fiction Festival</span>
+          <h3 style="margin:.35rem 0" class="latin">1st Fiction Festival — call &amp; review</h3>
+          <p>The club's first fiction festival. Submissions, peer review and the "editorially sanctioned masterpieces" selection all happened within the month.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="chron-item">
+      <div class="card">
+        <span class="mono meta">Earlier · founding</span>
+        <h3 style="margin:.35rem 0" class="latin">The club is founded</h3>
+        <p style="color:var(--ink-soft);margin-bottom:0">Ground broken at Fudan. Not yet open to the public — we planted our own flowers first.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-cols">
+    <div><h4 class="latin">Hortus de Escapismo</h4><p>Fudan Imaginative World Creators' Club · unofficial site</p></div>
+    <div><h4 class="latin">Next</h4><p>The 2nd Fiction Festival is in preparation; theme to be announced on WeChat.</p></div>
+    <div><h4>公众号</h4><div class="qr-box">空想花庭</div></div>
+  </div>
+</footer>
+
+<script src="../js/site.js"></script>
+</body>
+</html>
