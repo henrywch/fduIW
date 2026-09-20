@@ -1,0 +1,66 @@
+---
+import Base from "../layouts/Base.astro";
+import Footer from "../components/Footer.astro";
+---
+<Base lang="zh" title="修士名录 · 空想花庭"
+      description="修道院的住客：复旦大学空想世界创作者协会成员名录。"
+      active="members" canvas="pollen">
+
+<div class="wall-page">
+
+  <div class="wall-head">
+    <h1 data-scramble="修士名录">修士名录</h1>
+    <div class="wall-latin">· REGISTER · THE FRIARS ·</div>
+    <svg id="vine" viewBox="0 0 420 40" aria-hidden="true">
+      <path d="M10 30 C60 5 90 35 140 20 S240 5 290 22 S380 30 410 14 M70 24 q4 -10 12 -8 M210 18 q4 10 12 8 M330 22 q-6 -8 2 -14"/>
+    </svg>
+    <p class="mono meta">REGISTER · 以下名录以第一届小说节在册作品为准，其余社员名录编目中</p>
+  </div>
+
+  <div class="wall" style="column-count:4;max-width:1100px">
+
+    <div class="living center" data-f="prose">
+      <div class="avatar"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 8 C20 15 15 18 10 19 C15 20 20 24 24 31 C28 24 33 20 38 19 C33 18 28 15 24 8 Z"/><path d="M24 31 L24 40"/></svg></div>
+      <div class="stem">
+        <h3 data-scramble="魔王与小玖">魔王与小玖</h3>
+        <div class="meta">PRINCEPS &amp; KIRIN</div>
+        <div class="tags" style="margin-top:.5rem"><span class="tag">写作</span><span class="tag">世界观</span></div>
+        <p>《杭城十二时辰》之作者。治下兼有青莲堂与茶园，善种奇幻之花。</p>
+      </div>
+    </div>
+
+    <div class="living center" data-f="prose">
+      <div class="avatar"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="13"/><path d="M24 11 v26 M11 24 h26 M16 16 l16 16 M32 16 L16 32"/></svg></div>
+      <div class="stem">
+        <h3 data-scramble="旁观的好孩子">旁观的好孩子</h3>
+        <div class="meta">LAPLACE'S OBSERVER</div>
+        <div class="tags" style="margin-top:.5rem"><span class="tag">写作</span><span class="tag">科幻</span></div>
+        <p>《你算命了吗》之作者。相信一切皆有定数，包括下一篇交稿日期。</p>
+      </div>
+    </div>
+
+    <div class="living center" data-f="prose">
+      <div class="avatar"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 36 V14 l8 10 8-10 v22"/><path d="M34 14 v22"/></svg></div>
+      <div class="stem">
+        <h3 data-scramble="林子环">林子环</h3>
+        <div class="meta">MIDNIGHT ANCHOR</div>
+        <div class="tags" style="margin-top:.5rem"><span class="tag">写作</span><span class="tag">悬疑</span></div>
+        <p>《婺城午夜电台札记》之作者。午夜电台主播，信号只在子时接收良好。</p>
+      </div>
+    </div>
+
+    <div class="living center" data-f="prose">
+      <div class="avatar"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 38 L24 10 L34 38 M18 29 h12"/></svg></div>
+      <div class="stem">
+        <h3 data-scramble="浮光">浮光</h3>
+        <div class="meta">DRIFTING LIGHT</div>
+        <div class="tags" style="margin-top:.5rem"><span class="tag">写作</span><span class="tag">人设</span></div>
+        <p>《白银时代》之作者。在流水线与银河之间浇铸白银。</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<Footer lang="zh" mid="members" />
+</Base>

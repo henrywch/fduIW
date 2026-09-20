@@ -1,0 +1,66 @@
+---
+import Base from "../../layouts/Base.astro";
+import Footer from "../../components/Footer.astro";
+---
+<Base lang="en" title="The Friars · Hortus de Escapismo"
+      description="Register of the monastery's residents."
+      active="members" canvas="pollen">
+
+<div class="wall-page">
+
+  <div class="wall-head">
+    <h1 class="latin" data-scramble="The Friars">The Friars</h1>
+    <div class="wall-latin">修士名录 · REGISTER</div>
+    <svg id="vine" viewBox="0 0 420 40" aria-hidden="true">
+      <path d="M10 30 C60 5 90 35 140 20 S240 5 290 22 S380 30 410 14 M70 24 q4 -10 12 -8 M210 18 q4 10 12 8 M330 22 q-6 -8 2 -14"/>
+    </svg>
+    <p class="mono meta">REGISTER · as of the 1st Fiction Festival; the rest of the roll is being catalogued</p>
+  </div>
+
+  <div class="wall" style="column-count:4;max-width:1100px">
+
+    <div class="living center" data-f="prose">
+      <div class="avatar"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 8 C20 15 15 18 10 19 C15 20 20 24 24 31 C28 24 33 20 38 19 C33 18 28 15 24 8 Z"/><path d="M24 31 L24 40"/></svg></div>
+      <div class="stem">
+        <h3 data-scramble="魔王与小玖">魔王与小玖</h3>
+        <div class="meta">PRINCEPS &amp; KIRIN</div>
+        <div class="tags" style="margin-top:.5rem"><span class="tag">Prose</span><span class="tag">Worldbuilding</span></div>
+        <p>Author of "Twelve Hours of Hangzhou". Keeps both a hall and a tea garden; grows fantasy in rows.</p>
+      </div>
+    </div>
+
+    <div class="living center" data-f="prose">
+      <div class="avatar"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="13"/><path d="M24 11 v26 M11 24 h26 M16 16 l16 16 M32 16 L16 32"/></svg></div>
+      <div class="stem">
+        <h3 data-scramble="旁观的好孩子">旁观的好孩子</h3>
+        <div class="meta">LAPLACE'S OBSERVER</div>
+        <div class="tags" style="margin-top:.5rem"><span class="tag">Prose</span><span class="tag">Sci-fi</span></div>
+        <p>Author of "Have You Had Your Fortune Told?". Believes everything is predetermined, including the next deadline.</p>
+      </div>
+    </div>
+
+    <div class="living center" data-f="prose">
+      <div class="avatar"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 36 V14 l8 10 8-10 v22"/><path d="M34 14 v22"/></svg></div>
+      <div class="stem">
+        <h3 data-scramble="林子环">林子环</h3>
+        <div class="meta">MIDNIGHT ANCHOR</div>
+        <div class="tags" style="margin-top:.5rem"><span class="tag">Prose</span><span class="tag">Mystery</span></div>
+        <p>Author of "Midnight Radio Journals". A midnight anchor; reception is best at the zi hour.</p>
+      </div>
+    </div>
+
+    <div class="living center" data-f="prose">
+      <div class="avatar"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 38 L24 10 L34 38 M18 29 h12"/></svg></div>
+      <div class="stem">
+        <h3 data-scramble="浮光">浮光</h3>
+        <div class="meta">DRIFTING LIGHT</div>
+        <div class="tags" style="margin-top:.5rem"><span class="tag">Prose</span><span class="tag">Character design</span></div>
+        <p>Author of "The Silver Age". Casts silver somewhere between the assembly line and the Milky Way.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<Footer lang="en" mid="members" />
+</Base>

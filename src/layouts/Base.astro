@@ -1,0 +1,82 @@
+---
+// Base layout for every fduIW page.
+interface I18nStrings {
+  brand: string; navAbout: string; navMembers: string; navActivities: string; navWorks: string;
+  homeHref: string; membersHref: string; activitiesHref: string; worksHref: string;
+  altLangHref: string; altLangLabel: string; themeLabel: string;
+}
+interface Props {
+  lang: "zh" | "en";
+  title: string;
+  description: string;
+  active?: "about" | "members" | "activities" | "works";
+  themeClass?: string;       // e.g. "home"
+  headerClass?: string;      // e.g. "over-abyss" on the vigil page
+  canvas?: "vigil" | "pollen" | "none";
+}
+const { lang, title, description, active, themeClass = "", headerClass = "", canvas = "none" } = Astro.props;
+
+const S: Record<"zh" | "en", I18nStrings> = {
+  zh: {
+    brand: "空想花庭", navAbout: "关于", navMembers: "修士名录", navActivities: "活动志", navWorks: "花庭",
+    homeHref: "/", membersHref: "/members/", activitiesHref: "/activities/", worksHref: "/works/",
+    altLangHref: Astro.url.pathname === "/" ? "/en/" : "/en" + Astro.url.pathname, altLangLabel: "EN",
+    themeLabel: "切换昼夜",
+  },
+  en: {
+    brand: "Hortus de Escapismo", navAbout: "About", navMembers: "Friars", navActivities: "Chronicle", navWorks: "Garden",
+    homeHref: "/en/", membersHref: "/en/members/", activitiesHref: "/en/activities/", worksHref: "/en/works/",
+    altLangHref: Astro.url.pathname.replace(/^\/en/, "") || "/", altLangLabel: "中",
+    themeLabel: "toggle day/night",
+  },
+};
+const t = S[lang];
+const brandClass = lang === "en" ? "latin" : "";
+---
+<!DOCTYPE html>
+<html lang={lang === "zh" ? "zh-CN" : "en"} data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{title}</title>
+<meta name="description" content={description}>
+<link rel="stylesheet" href="/css/site.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:ital@0;1&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<script is:inline>
+(function(){var t=localStorage.getItem("hds-theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");var h=document.documentElement;h.setAttribute("data-theme",t);try{var lt=sessionStorage.getItem("hds-locale-turn");if(lt){h.classList.add("turn-arrive");h.setAttribute("data-turn-in",lt);setTimeout(function(){h.classList.remove("turn-arrive")},1600);}}catch(e){}})();
+</script>
+</head>
+<body class={themeClass}>
+
+{canvas === "vigil" && (
+  <>
+    <canvas id="gl" aria-hidden="true"></canvas>
+    <div class="vigil-shade" aria-hidden="true"></div>
+    <canvas id="petals" aria-hidden="true"></canvas>
+  </>
+)}
+{canvas === "pollen" && <canvas id="pollen" aria-hidden="true"></canvas>}
+
+<header class:list={["site-header", headerClass]}>
+  <a class="brand" href={t.homeHref}>
+    <svg class="halo" viewBox="0 0 32 32" aria-hidden="true"><ellipse cx="16" cy="16" rx="13" ry="5.5" transform="rotate(-18 16 16)"/></svg>
+    <span class={brandClass}>{t.brand}</span>
+  </a>
+  <nav class="site-nav">
+    <a href={t.homeHref} class:list={[active === "about" && "active"]}>{t.navAbout}</a>
+    <a href={t.membersHref} class:list={[active === "members" && "active"]}>{t.navMembers}</a>
+    <a href={t.activitiesHref} class:list={[active === "activities" && "active"]}>{t.navActivities}</a>
+    <a href={t.worksHref} class:list={[active === "works" && "active"]}>{t.navWorks}</a>
+    <div class="toggles">
+      <a class="toggle-btn" href={t.altLangHref}>{t.altLangLabel}</a>
+      <button class="toggle-btn" id="theme-toggle" type="button" aria-label={t.themeLabel}>◐</button>
+    </div>
+  </nav>
+</header>
+
+<slot />
+
+<script is:inline src="/js/site.js"></script>
+</body>
+</html>

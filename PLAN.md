@@ -197,10 +197,11 @@ not the front door.
 
 ### Setup notes
 
-1. EdgeOne Pages connects the GitHub repo directly. Build command: `python tools/build.py`;
-   output directory: `dist/`. The pipeline assembles a whitelist-only public tree (pages,
-   css/js, images, regenerated chapbooks) so raw sources in `assets/label|source`, tooling,
-   and `designs/` never reach the edge. GitHub Pages can mirror the same `dist/` via CI.
+1. EdgeOne Pages connects the GitHub repo directly. Build command: `npm ci && npm run build`;
+   output directory: `dist/`. The site is Astro (static output, no SSR): pages under
+   `src/pages/` (zh at root, en under `/en/`), works as a content collection fed by
+   `tools/sync_works.mjs` from `assets/label/*.md` (`npm run sync:works` first — build runs it too).
+   `designs/` ships under `public/designs/` as the motion lab.
 2. Custom domain (optional, ~¥30–60/yr for a `.top`/`.xyz`): point CN users at EdgeOne, or later
    split DNS by region. Without an ICP licence stay on the free `*.edgeone.app`-style subdomain.
 3. HTTPS everywhere via the platform's managed certificates; enforce HSTS at the edge.
@@ -239,9 +240,8 @@ the browser.)
   on boot. It is a *store-and-forward* worker: it does its job whenever the network exists and skips
   silently when it doesn't.
 - **Pipeline per submission**: scan `assets/source/` → hash each file → skip if unchanged (hashes in
-  `manifest.yml`) → `pandoc` docx→Markdown with media extraction → `mozjpeg/pngquant` compress
-  images into `assets/image/` → generate frontmatter (title, author, date, tags from
-  `assets/label/*.md`) → write a conventional commit per work → `git push`.
+  `manifest.yml`) → the sync hook runs `npm ci && npm run build` (Astro validators +
+collection schema catch malformed frontmatter at build time) → commit → `git push`.
 - **Idempotent and safe**: the commit is the unit of work; a crash mid-run leaves the tree dirty but
   never the deployed site, because publishing only happens after a CI build of a pushed commit.
 - **Provenance**: every work's page gets a "编目于 <date> · source: <filename>" line — the

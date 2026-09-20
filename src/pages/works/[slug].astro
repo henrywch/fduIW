@@ -1,0 +1,41 @@
+---
+import { getCollection, render } from "astro:content";
+import Base from "../../layouts/Base.astro";
+
+export async function getStaticPaths() {
+  const works = await getCollection("works");
+  return works.map((w) => ({ params: { slug: w.id }, props: { work: w } }));
+}
+
+const { work } = Astro.props;
+const { Content } = await render(work);
+const d = work.data;
+---
+<Base lang="zh" title={`${d.title} · 空想花庭`}
+      description={d.subtitle} active="works" canvas="none" headerClass="detail-header">
+
+<main>
+  <div class="chapbook">
+    <div class="cover-rail"><img src={d.cover} alt={d.title + " 封面"}></div>
+    <div class="chapbook-head">
+      <div class="mono meta">CATALOGUE · {d.date} · 作者 {d.author}</div>
+      <h1>{d.title}</h1>
+      <div class="subtitle">{d.subtitle}</div>
+      <div class="mono latin" style="margin-top:.5rem">{d.latin}</div>
+      <div class="tags" style="margin-top:.8rem">{d.tags.map((t) => <span class="tag">{t}</span>)}</div>
+    </div>
+    <article>
+      <Content />
+    </article>
+    <p class="mono meta" style="margin-top:3rem;text-align:center">编目于 {d.date} · source: {d.source}</p>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-cols">
+    <div><h4>空想花庭</h4><p>复旦大学空想世界创作者协会 · 非官方网站</p></div>
+    <div><h4>返回</h4><p><a href="/works/">花庭 · 画廊墙</a></p></div>
+    <div><h4>公众号</h4><div class="qr-box">空想花庭</div></div>
+  </div>
+</footer>
+</Base>

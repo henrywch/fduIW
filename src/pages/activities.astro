@@ -1,0 +1,71 @@
+---
+import Base from "../layouts/Base.astro";
+import Footer from "../components/Footer.astro";
+---
+<Base lang="zh" title="活动志 · 空想花庭"
+      description="小说节、企划与讲座：空想花庭的编年史。"
+      active="activities" canvas="pollen">
+
+<div class="wall-page">
+
+  <div class="wall-head">
+    <h1 data-scramble="活动志">活动志</h1>
+    <div class="wall-latin">· THE CHRONICLE ·</div>
+    <svg id="vine" viewBox="0 0 420 40" aria-hidden="true">
+      <path d="M10 30 C60 5 90 35 140 20 S240 5 290 22 S380 30 410 14 M70 24 q4 -10 12 -8 M210 18 q4 10 12 8 M330 22 q-6 -8 2 -14"/>
+    </svg>
+    <p class="mono meta">CHRONICLE · 院内大事，按年编录</p>
+  </div>
+
+  <div class="chronicle">
+
+    <div class="chron-item ongoing">
+      <div class="living" style="display:block;cursor:default">
+        <div class="stem" style="padding:1.3rem 1.4rem 1.5rem">
+          <span class="mono meta">进行中 · 常年</span>
+          <h3 style="margin:.35rem 0">开放投稿<span class="badge-halo">进行中</span></h3>
+          <p>小说、画作、OC 设定、世界观企划，不拘一格。经园丁编目后陈于<a href="/works/">花庭</a>。投递方式详见公众号后台。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="chron-item">
+      <div class="living" style="display:block;cursor:default">
+        <div class="stem" style="padding:1.3rem 1.4rem 1.5rem">
+          <span class="mono meta">2024-06-01 · 小说节</span>
+          <h3 style="margin:.35rem 0">第一届「咕事会」小说节 · 放榜</h3>
+          <p>四座奖项各归其主：</p>
+          <ul style="margin:.2rem 0;font-size:.95rem;color:var(--ink-soft)">
+            <li>最佳奇幻奖 / 最佳潜力奖 · 《杭城十二时辰》— 魔王与小玖</li>
+            <li>最佳科幻奖 · 《你算命了吗》— 旁观的好孩子</li>
+            <li>最佳推理奖 · 《婺城午夜电台札记》— 林子环</li>
+            <li>最佳故事奖 / 最佳人设奖 · 《白银时代》— 浮光</li>
+          </ul>
+          <p style="margin-bottom:0"><a href="/works/">前往花庭赏读 →</a></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="chron-item">
+      <div class="living" style="display:block;cursor:default">
+        <div class="stem" style="padding:1.3rem 1.4rem 1.5rem">
+          <span class="mono meta">2024-05 · 小说节</span>
+          <h3 style="margin:.35rem 0">第一届「咕事会」小说节 · 征稿与评审</h3>
+          <p>社团首次小说节。收稿、互评、「咕咕钦点的神作」遴选均在此月内完成。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="chron-item">
+      <div class="card">
+        <span class="mono meta">更早 · 建院</span>
+        <h3 style="margin:.35rem 0">空想世界创作者协会成立</h3>
+        <p style="color:var(--ink-soft);margin-bottom:0">修道院于复旦破土。开园不公于众，先种自己的花。</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<Footer lang="zh" mid="activities" />
+</Base>
