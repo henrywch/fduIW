@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:ital@0;1&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
 <script>
-(function(){var t=localStorage.getItem("hds-theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.documentElement.setAttribute("data-theme",t);})();
+(function(){var t=localStorage.getItem("hds-theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");var h=document.documentElement;h.setAttribute("data-theme",t);try{var lt=sessionStorage.getItem("hds-locale-turn");if(lt){h.classList.add("turn-arrive");h.setAttribute("data-turn-in",lt);setTimeout(function(){h.classList.remove("turn-arrive")},1600);}}catch(e){}})();
 </script>
 </head>
 <body>

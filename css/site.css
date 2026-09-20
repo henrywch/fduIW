@@ -681,6 +681,65 @@ main { max-width: 1060px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
 ::view-transition-old(root) { z-index: 1; }
 ::view-transition-new(root) { z-index: 2; }
 
+/* ============ locale page-turn (zh ⇄ en) ============ */
+
+/* Western codex hinges left; classical Chinese thread-bound books hinge right.
+   zh→en covers left-to-right, en→zh right-to-left. */
+.pageturn {
+  position: fixed; inset: 0; z-index: 9995;
+  perspective: 1800px;
+  pointer-events: none;
+}
+.pageturn .sheet {
+  position: absolute; inset: 0;
+  background: linear-gradient(105deg, #EDE6D2, #F7F3EA 45%, #EDE6D2);
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 1.1rem;
+}
+.pageturn .sheet::before {  /* vellum grain on the turning leaf */
+  content: ""; position: absolute; inset: 0; opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+.pageturn .sheet .leaf-mark { width: 56px; height: 56px; }
+.pageturn .sheet .leaf-mark ellipse { fill: none; stroke: #C9A45C; stroke-width: 1.6; }
+.pageturn .sheet .leaf-word {
+  font-size: clamp(1.4rem, 4vw, 2.4rem);
+  letter-spacing: 0.28em;
+  color: #8A6A26;
+  animation: leaf-word-in 0.5s ease 0.3s both;
+}
+@keyframes leaf-word-in { from { opacity: 0; letter-spacing: 0.5em; } to { opacity: 1; letter-spacing: 0.28em; } }
+.pageturn .shade {  /* turning-edge shadow */
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(90deg, rgba(30, 25, 15, 0.35), transparent 55%);
+  opacity: 0;
+  animation: shade-pulse 0.55s ease both;
+}
+.pageturn.hinge-right .shade { background: linear-gradient(-90deg, rgba(30, 25, 15, 0.35), transparent 55%); }
+@keyframes shade-pulse { 40% { opacity: 1; } 100% { opacity: 0; } }
+
+.pageturn.hinge-left .sheet  { transform-origin: left center; }
+.pageturn.hinge-right .sheet { transform-origin: right center; }
+
+.pageturn.cover-left .sheet  { animation: cover-left 0.55s cubic-bezier(0.5, 0, 0.4, 1) both; }
+.pageturn.cover-right .sheet { animation: cover-right 0.55s cubic-bezier(0.5, 0, 0.4, 1) both; }
+.pageturn.lift-left .sheet   { animation: lift-left 0.5s cubic-bezier(0.5, 0, 0.6, 1) both; }
+.pageturn.lift-right .sheet  { animation: lift-right 0.5s cubic-bezier(0.5, 0, 0.6, 1) both; }
+.pageturn.cover-left .shade, .pageturn.cover-right .shade { animation-duration: 0.55s; }
+.pageturn.lift-left .shade, .pageturn.lift-right .shade { animation-duration: 0.5s; }
+
+@keyframes cover-left  { from { transform: rotateY(-179deg); } to { transform: rotateY(0); } }
+@keyframes cover-right { from { transform: rotateY(179deg); }  to { transform: rotateY(0); } }
+@keyframes lift-left   { from { transform: rotateY(0); } to { transform: rotateY(-179deg); } }
+@keyframes lift-right  { from { transform: rotateY(0); } to { transform: rotateY(179deg); } }
+
+/* arrival state: body hidden until the flat sheet is in place (set via head script) */
+html.turn-arrive body > *:not(.pageturn) { visibility: hidden; }
+html.turn-arrive { background: #EFE9DA; }
+html.turn-arrive[data-theme="dark"] { background: #191D2A; }
+
 /* ============ reduced motion ============ */
 
 @media (prefers-reduced-motion: reduce) {

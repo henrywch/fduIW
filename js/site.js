@@ -6,6 +6,59 @@
   var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   var isDark = function () { return root.getAttribute("data-theme") === "dark"; };
 
+  /* ============ locale page-turn ============
+     zh→en turns from the left hinge (codex); en→zh from the right (thread-bound
+     books open on the right). State passes through sessionStorage so the
+     destination page can lift the leaf the same way it was laid down. */
+  var LANG_TURN_KEY = "hds-locale-turn";
+  function makeSheet(hinge, cls, word) {
+    var pt = document.createElement("div");
+    pt.className = "pageturn " + hinge + " " + cls;
+    pt.innerHTML =
+      '<div class="sheet">' +
+        '<svg class="leaf-mark" viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="32" cy="32" rx="26" ry="10" transform="rotate(-18 32 32)"/></svg>' +
+        (word ? '<div class="leaf-word">' + word + "</div>" : "") +
+        '<div class="shade"></div>' +
+      "</div>";
+    document.body.appendChild(pt);
+    return pt;
+  }
+
+  // departure: intercept the language toggle
+  document.querySelectorAll("a.toggle-btn").forEach(function (a) {
+    var label = (a.textContent || "").trim();
+    if (label !== "EN" && label !== "中") return;
+    if (reduced) return;
+    a.addEventListener("click", function (e) {
+      e.preventDefault();
+      var toEn = label === "EN";
+      try { sessionStorage.setItem(LANG_TURN_KEY, toEn ? "lift-left" : "lift-right"); } catch (_) {}
+      var pt = makeSheet(toEn ? "hinge-left" : "hinge-right",
+                         toEn ? "cover-left" : "cover-right",
+                         toEn ? "HORTUS&nbsp;DE&nbsp;ESCAPISMO" : "空 想 花 庭");
+      var href = a.getAttribute("href");
+      var done = false;
+      function go() { if (!done) { done = true; location.href = href; } }
+      pt.querySelector(".sheet").addEventListener("animationend", go);
+      setTimeout(go, 900); // fallback if animation is throttled away
+    });
+  });
+
+  // arrival: lift the leaf laid down on the way here
+  var turnIn = null;
+  try { turnIn = sessionStorage.getItem(LANG_TURN_KEY); } catch (_) {}
+  // head script may mirror it onto <html> to suppress the flash before JS runs
+  if (!turnIn && root.hasAttribute("data-turn-in")) turnIn = root.getAttribute("data-turn-in");
+  if (turnIn && root.classList.contains("turn-arrive")) {
+    root.classList.remove("turn-arrive");
+    root.removeAttribute("data-turn-in");
+    try { sessionStorage.removeItem(LANG_TURN_KEY); } catch (_) {}
+    if (!reduced) {
+      var lift = makeSheet(turnIn === "lift-left" ? "hinge-left" : "hinge-right", turnIn);
+      setTimeout(function () { lift.remove(); }, 900);
+    }
+  }
+
   /* ============ theme toggle (circular reveal) ============ */
   var dayTarget = isDark() ? 0 : 1, dayNow = dayTarget;
   function hdsSetDay() { dayTarget = isDark() ? 0 : 1; }
