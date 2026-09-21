@@ -254,6 +254,18 @@ collection schema catch malformed frontmatter at build time) → commit → `git
   every save is a commit → CI rebuild. Fits this stack exactly, zero servers
   ([comparison](https://unfoldcms.com/blog/decap-cms-alternatives)).
 
+### Member records at rest
+
+- Plaintext member profiles never enter the repo. The tracked form is `members-store/*.vault`
+  (AES-256-GCM, scrypt-derived key, per-record salt/IV — `tools/members_crypt.mjs`). The key
+  lives in the `MEMBERS_KEY` env var (set it in the EdgeOne project); locally, fall back to
+  `tools/.members_key` (gitignored). `npm run build` decrypts into `src/content/members-local/`
+  before `astro build`; hand ops: `npm run members:lock` / `members:open`.
+- Rationale: SQLCipher (the classic "encrypted SQLite") needs native compilation in CI and is
+  overkill for a static read-only roster; SOPS+age would fit git but adds an external binary.
+  Node's built-in `crypto` is zero-dependency and fast ([AES-GCM at rest is the current
+  standard](https://knowledgelib.io/software/security/encryption-at-rest-in-transit/2026)).
+
 ### Optional dynamics without a server
 
 - **Comments/reactions**: Giscus (GitHub Discussions-backed) — free, no backend.
