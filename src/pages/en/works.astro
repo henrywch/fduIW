@@ -14,10 +14,10 @@ const EN: Record<string, { genre: string; blurb: string }> = {
 
 // web-sourced images dress headers only; the wall shows originals only
 const wall = [
-  { kind: "novel", slug: "hangzhou-twelve-hours", img: "/assets/image/杭城十二时辰-窗格.jpg" },
-  { kind: "novel", slug: "cyber-fortune-telling", img: "/assets/image/cyber-fortune-telling.png" },
-  { kind: "novel", slug: "midnight-broadcast-notes", img: "/assets/image/midnight-broadcast.jpg" },
-  { kind: "novel", slug: "silver-age", img: "/assets/image/sunset-factory.jpg" },
+  { kind: "fantasy", slug: "hangzhou-twelve-hours", img: "/assets/image/杭城十二时辰-窗格.jpg" },
+  { kind: "fantasy", slug: "cyber-fortune-telling", img: "/assets/image/cyber-fortune-telling.png" },
+  { kind: "fantasy", slug: "midnight-broadcast-notes", img: "/assets/image/midnight-broadcast.jpg" },
+  { kind: "fantasy", slug: "silver-age", img: "/assets/image/sunset-factory.jpg" },
   { kind: "setting", img: "/assets/image/杭城十二时辰-封面-全.jpg", alt: "Qing-min bestiary excerpt", title: "青民谱系 · 节录",
     meta: "魔王与小玖 · worldbuilding", blurb: "The Qing-min bestiary — shares a world with \"Twelve Hours of Hangzhou\"",
     href: "/works/hangzhou-twelve-hours/" },
@@ -40,19 +40,19 @@ const wall = [
 
   <div class="seeds">
     <button class="seed active" data-f="all">All</button>
-    <button class="seed" data-f="novel">Prose</button>
-    <button class="seed" data-f="art">Painting</button>
-    <button class="seed" data-f="setting">Setting</button>
+    <button class="seed" data-f="fantasy">Fantasy</button>
+    <button class="seed" data-f="illustration">Illustration</button>
+    <button class="seed" data-f="workview">Worldview</button>
   </div>
 
   <div class="wall">
 
-    {wall.map((item) => item.kind === "novel" ? (() => {
+    {wall.map((item) => item.kind === "fantasy" ? (() => {
       const w = novels.get(item.slug)!;
       const en = EN[w.id.split("/").pop()!];
       return (
-        <a class="living" data-f="novel" href={`/works/${w.id.split("/").pop()}/`}>
-          <span class="medium-tag">文</span>
+        <a class="living" data-f="fantasy" href={`/works/${w.id.split("/").pop()}/`}>
+          <span class="medium-tag">FANTASY</span>
           <img src={item.img} alt={w.data.title} loading="lazy" />
           <div class="stem">
             <h3 data-scramble={w.data.title}>{w.data.title}</h3>
@@ -63,7 +63,7 @@ const wall = [
       );
     })() : (
       <a class="living" data-f={item.kind} href={item.href || item.img}>
-        <span class="medium-tag">{item.kind === "art" ? "画" : "设定"}</span>
+        <span class="medium-tag">{item.kind === "illustration" ? "PAINTING" : "WORLDVIEW"}</span>
         <img src={item.img} alt={item.alt} loading="lazy" />
         <div class="stem">
           <h3 data-scramble={item.title}>{item.title}</h3>
