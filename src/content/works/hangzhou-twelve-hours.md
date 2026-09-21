@@ -3,6 +3,7 @@ title: "杭城十二时辰"
 subtitle: "第一届咕事会小说节“最佳奇幻奖”和“最佳潜力奖”双奖佳作"
 author: "魔王与小玖"
 date: "2024-05-29"
+cats: ["fantasy"]
 tags: ["奇幻", "魔王与小玖"]
 cover: "/assets/image/杭城十二时辰-封面.png"
 latin: "Hora Duodecim Hangzhou"

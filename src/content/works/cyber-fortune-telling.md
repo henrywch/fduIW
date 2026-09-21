@@ -3,6 +3,7 @@ title: "你算命了吗"
 subtitle: "第一届咕事会小说节“最佳科幻奖”"
 author: "旁观的好孩子"
 date: "2024-06-01"
+cats: ["fantasy"]
 tags: ["科幻", "旁观的好孩子"]
 cover: "/assets/image/cyber-fortune-telling.png"
 latin: "Hast Thou Consulted Fate?"

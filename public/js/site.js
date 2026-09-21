@@ -392,7 +392,7 @@
     document.querySelectorAll(".reveal").forEach(function (el) { io2.observe(el); });
   }
 
-  /* ============ living wall filter ============ */
+  /* ============ living wall filter (multi-label: a work may sit in several cats) ============ */
   var seeds = document.querySelectorAll(".seed");
   if (seeds.length) {
     seeds.forEach(function (s) {
@@ -401,7 +401,8 @@
         s.classList.add("active");
         var f = s.dataset.f;
         document.querySelectorAll(".living[data-f]").forEach(function (p) {
-          var show = f === "all" || p.dataset.f === f;
+          var cats = (p.dataset.f || "").split(/\s+/);
+          var show = f === "all" || cats.indexOf(f) !== -1;
           p.classList.toggle("gone", !show);
           p.classList.remove("bloom");
           if (show) { void p.offsetWidth; p.classList.add("bloom"); }

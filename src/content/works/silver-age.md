@@ -3,6 +3,7 @@ title: "白银时代"
 subtitle: "第一届咕事会小说节“最佳故事奖”和“最佳人设奖”双奖佳作"
 author: "浮光"
 date: "2024-06-01"
+cats: ["fantasy"]
 tags: ["浮光"]
 cover: "/assets/image/sunset-factory.jpg"
 latin: "Argenteum Saeculum"

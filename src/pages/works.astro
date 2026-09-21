@@ -5,18 +5,20 @@ import Footer from "../components/Footer.astro";
 
 const novels = new Map((await getCollection("works")).map((w) => [w.id.split("/").pop()!, w]));
 
+const CAT_ZH = { fantasy: "幻想", illustration: "笔墨", workview: "世界观" } as const;
+const catLabelZh = (c: string) => (CAT_ZH as Record<string, string>)[c] ?? c;
+const genreOf = (tags: string[]) => tags.filter((t) => ["奇幻", "科幻", "悬疑"].includes(t))[0] || "文";
+
 // web-sourced images dress headers only; the wall shows originals only
 const wall = [
-  { kind: "fantasy", slug: "hangzhou-twelve-hours", img: "/assets/image/杭城十二时辰-窗格.jpg" },
-  { kind: "fantasy", slug: "cyber-fortune-telling", img: "/assets/image/cyber-fortune-telling.png" },
-  { kind: "fantasy", slug: "midnight-broadcast-notes", img: "/assets/image/midnight-broadcast.jpg" },
-  { kind: "fantasy", slug: "silver-age", img: "/assets/image/sunset-factory.jpg" },
-  { kind: "workview", img: "/assets/image/杭城十二时辰-封面-全.jpg", alt: "青民谱系 节录", title: "青民谱系 · 节录",
+  { slug: "hangzhou-twelve-hours", img: "/assets/image/杭城十二时辰-窗格.jpg" },
+  { slug: "cyber-fortune-telling", img: "/assets/image/cyber-fortune-telling.png" },
+  { slug: "midnight-broadcast-notes", img: "/assets/image/midnight-broadcast.jpg" },
+  { slug: "silver-age", img: "/assets/image/sunset-factory.jpg" },
+  { cats: ["workview"], img: "/assets/image/杭城十二时辰-封面-全.jpg", alt: "青民谱系 节录", title: "青民谱系 · 节录",
     meta: "魔王与小玖 · 世界观设定", blurb: "妖盟、青莲堂与杭城，设定同《杭城十二时辰》共享一界",
     href: "/works/hangzhou-twelve-hours/" },
 ];
-
-const genreOf = (tags: string[]) => tags.filter((t) => ["奇幻", "科幻", "悬疑"].includes(t))[0] || "文";
 ---
 <Base lang="zh" title="花庭 · 空想花庭"
       description="社员作品画廊：小说、画作、OC 设定，自由生长的花墙。"
@@ -42,11 +44,11 @@ const genreOf = (tags: string[]) => tags.filter((t) => ["奇幻", "科幻", "悬
 
   <div class="wall">
 
-    {wall.map((item) => item.kind === "fantasy" ? (() => {
+    {wall.map((item) => item.slug ? (() => {
       const w = novels.get(item.slug)!;
       return (
-        <a class="living" data-f="fantasy" href={`/works/${w.id.split("/").pop()}/`}>
-          <span class="medium-tag">幻想</span>
+        <a class="living" data-f={w.data.cats.join(" ")} href={`/works/${w.id.split("/").pop()}/`}>
+          <span class="medium-tag">{w.data.cats.map(catLabelZh).join(" · ")}</span>
           <img src={item.img} alt={w.data.title + " 封面"} loading="lazy" />
           <div class="stem">
             <h3 data-scramble={w.data.title}>{w.data.title}</h3>
@@ -56,8 +58,8 @@ const genreOf = (tags: string[]) => tags.filter((t) => ["奇幻", "科幻", "悬
         </a>
       );
     })() : (
-      <a class="living" data-f={item.kind} href={item.href || item.img}>
-        <span class="medium-tag">{item.kind === "illustration" ? "笔墨" : "世界观"}</span>
+      <a class="living" data-f={item.cats.join(" ")} href={item.href || item.img}>
+        <span class="medium-tag">{item.cats.map(catLabelZh).join(" · ")}</span>
         <img src={item.img} alt={item.alt} loading="lazy" />
         <div class="stem">
           <h3 data-scramble={item.title}>{item.title}</h3>

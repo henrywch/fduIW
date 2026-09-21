@@ -3,6 +3,7 @@ title: "婺城午夜电台札记"
 subtitle: "第一届咕事会小说节“最佳推理奖”"
 author: "林子环"
 date: "2024-06-01"
+cats: ["fantasy"]
 tags: ["悬疑", "林子环"]
 cover: "/assets/image/midnight-broadcast.jpg"
 latin: "Midnight Airwave Journals"

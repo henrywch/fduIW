@@ -1,13 +1,15 @@
 // Syncs raw manuscripts from assets/label/*.md into the Astro content
-// collection at src/content/works/<slug>.md (clean frontmatter + body).
-// This is the local half of the future sync agent; run: npm run sync:works
+// collection at src/content/works/<slug>.md. `cats` classify works
+// multi-membership-style (fantasy | illustration | workview) — the registry
+// file works.registry.jsonl is derived here too, one line per work.
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const LABEL_DIR = path.join(ROOT, "assets", "label");
-const OUT_DIR = path.join(ROOT, "src", "content", "works", "fantasy");
+const OUT_DIR = path.join(ROOT, "src", "content", "works");
+const REGISTRY = path.join(ROOT, "src", "content", "works.registry.jsonl");
 
 // slug -> { label file, cover (under /assets/image/), latin tagline }
 const WORKS = [
@@ -50,6 +52,7 @@ function yamlString(s) {
 }
 
 function main() {
+  const lines = [];
   fs.mkdirSync(OUT_DIR, { recursive: true });
   for (const w of WORKS) {
     let p = path.join(LABEL_DIR, w.file);
@@ -71,6 +74,7 @@ function main() {
       `subtitle: ${yamlString(meta.subtitle || "")}`,
       `author: ${yamlString(meta.author || "")}`,
       `date: ${yamlString(date)}`,
+      `cats: ["fantasy"]`,
       `tags: [${tags.map(yamlString).join(", ")}]`,
       `cover: ${yamlString("/assets/image/" + w.cover)}`,
       `latin: ${yamlString(w.latin)}`,
@@ -82,7 +86,14 @@ function main() {
     ].join("\n");
     fs.writeFileSync(path.join(OUT_DIR, w.slug + ".md"), frontmatter);
     console.log("synced", w.slug, "<-", path.basename(p));
+
+    lines.push(JSON.stringify({
+      slug: w.slug, title, author: meta.author || "", date,
+      cats: ["fantasy"], cover: "/assets/image/" + w.cover, latin: w.latin,
+    }));
   }
+  fs.writeFileSync(REGISTRY, lines.join("\n") + "\n");
+  console.log("registry ->", path.relative(ROOT, REGISTRY), `(${lines.length} entries)`);
 }
 
 main();
