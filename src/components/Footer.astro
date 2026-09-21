@@ -5,12 +5,12 @@ const { lang, mid } = Astro.props;
 
 const C = {
   zh: {
-    title: "空想花庭", sub: "复旦大学空想世界创作者协会 · 非官方网站",
+    title: "空想花庭", sub: "复旦大学空想世界创作者协会 · 同人网站",
     midTitles: { index: "站内", members: "入院", activities: "预告", works: "投稿" },
     geek: "公众号",
   },
   en: {
-    title: "Hortus de Escapismo", sub: "Fudan Imaginative World Creators' Club · unofficial site",
+    title: "Hortus de Escapismo", sub: "Fudan Imaginative World Creators' Club · fan-made site",
     midTitles: { index: "Index", members: "Join", activities: "Next", works: "Submit" },
     geek: "公众号",
   },
@@ -20,13 +20,13 @@ const zhMid: Record<string, any> = {
   index: "links",
   members: `(带着你未完成的世界来——详见<a href="/">关于</a>。)`,
   activities: "第二届小说节筹备中，企划主题将于公众号公布。",
-  works: "把你的花种带来——公众号后台或社内渠道投递，由园丁编目上墙。",
+  works: "把你的花种带来——公众号后台或社内渠道投递，由萨科塔编目上墙。",
 };
 const enMid: Record<string, any> = {
   index: "links",
-  members: `Bring your unfinished world — see <a href="/en/">About</a>.`,
+  members: `Bring your "escapism" — see <a href="/en/">About</a>.`,
   activities: "The 2nd Fiction Festival is in preparation; theme to be announced on WeChat.",
-  works: "Bring us your seed — via the WeChat backstage or club channels; gardeners catalogue it onto the wall.",
+  works: "Bring us your seed — via the WeChat backstage or club channels; the Sankta catalogue it onto the wall.",
 };
 const mid2 = lang === "zh" ? zhMid : enMid;
 ---
@@ -41,8 +41,8 @@ const mid2 = lang === "zh" ? zhMid : enMid;
       {mid2[mid] === "links" ? (
         <ul>
           {lang === "zh"
-            ? <Fragment><li><a href="/works/">花庭 · 全部作品</a></li><li><a href="/members/">修士名录</a></li><li><a href="/activities/">活动志</a></li></Fragment>
-            : <Fragment><li><a href="/en/works/">The Garden · all works</a></li><li><a href="/en/members/">The Friars</a></li><li><a href="/en/activities/">The Chronicle</a></li></Fragment>}
+            ? <Fragment><li><a href="/works/">花庭 · 全部作品</a></li><li><a href="/members/">住客名录</a></li><li><a href="/activities/">活动志</a></li></Fragment>
+            : <Fragment><li><a href="/en/works/">The Garden · all works</a></li><li><a href="/en/members/">The Tenants</a></li><li><a href="/en/activities/">The Chronicle</a></li></Fragment>}
         </ul>
       ) : (
         <p set:html={mid2[mid]} />

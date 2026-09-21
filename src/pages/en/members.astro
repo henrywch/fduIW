@@ -6,15 +6,15 @@ import MemberCard from "../../components/MemberCard.astro";
 
 const members = (await getCollection("members")).sort((a, b) => a.data.order - b.data.order);
 ---
-<Base lang="en" title="The Friars · Hortus de Escapismo"
-      description="Register of the monastery's residents."
+<Base lang="en" title="The Tenants · Hortus de Escapismo"
+      description="Register of the garden's residents."
       active="members" canvas="pollen">
 
 <div class="wall-page">
 
   <div class="wall-head">
-    <h1 class="latin" data-scramble="The Friars">The Friars</h1>
-    <div class="wall-latin">修士名录 · REGISTER</div>
+    <h1 class="latin" data-scramble="The Tenants">The Tenants</h1>
+    <div class="wall-latin">住客名录 · REGISTER</div>
     <svg id="vine" viewBox="0 0 420 40" aria-hidden="true">
       <path d="M10 30 C60 5 90 35 140 20 S240 5 290 22 S380 30 410 14 M70 24 q4 -10 12 -8 M210 18 q4 10 12 8 M330 22 q-6 -8 2 -14"/>
     </svg>

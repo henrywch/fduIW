@@ -18,13 +18,13 @@ const { lang, title, description, active, themeClass = "", headerClass = "", can
 
 const S: Record<"zh" | "en", I18nStrings> = {
   zh: {
-    brand: "空想花庭", navAbout: "关于", navMembers: "修士名录", navActivities: "活动志", navWorks: "花庭",
+    brand: "空想花庭", navAbout: "关于", navMembers: "住客名录", navActivities: "活动志", navWorks: "花庭",
     homeHref: "/", membersHref: "/members/", activitiesHref: "/activities/", worksHref: "/works/",
     altLangHref: Astro.url.pathname === "/" ? "/en/" : "/en" + Astro.url.pathname, altLangLabel: "EN",
     themeLabel: "切换昼夜",
   },
   en: {
-    brand: "Hortus de Escapismo", navAbout: "About", navMembers: "Friars", navActivities: "Chronicle", navWorks: "Garden",
+    brand: "Hortus de Escapismo", navAbout: "About", navMembers: "Tenants", navActivities: "Chronicle", navWorks: "Garden",
     homeHref: "/en/", membersHref: "/en/members/", activitiesHref: "/en/activities/", worksHref: "/en/works/",
     altLangHref: Astro.url.pathname.replace(/^\/en/, "") || "/", altLangLabel: "中",
     themeLabel: "toggle day/night",

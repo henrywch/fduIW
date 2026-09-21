@@ -8,7 +8,7 @@ const entries = (await getCollection("activities"))
   .sort((a, b) => Number(b.data.ongoing) - Number(a.data.ongoing) || b.data.date.localeCompare(a.data.date));
 ---
 <Base lang="en" title="The Chronicle · Hortus de Escapismo"
-      description="Fiction festivals, joint projects and lectures: the monastery's chronicle."
+      description="Fiction festivals, joint projects and lectures: the garden's chronicle."
       active="activities" canvas="pollen">
 
 <div class="wall-page">
@@ -19,7 +19,7 @@ const entries = (await getCollection("activities"))
     <svg id="vine" viewBox="0 0 420 40" aria-hidden="true">
       <path d="M10 30 C60 5 90 35 140 20 S240 5 290 22 S380 30 410 14 M70 24 q4 -10 12 -8 M210 18 q4 10 12 8 M330 22 q-6 -8 2 -14"/>
     </svg>
-    <p class="mono meta">CHRONICLE · the house's great affairs, by year</p>
+    <p class="mono meta">CHRONICLE · annals of Hortus de Escapismo</p>
   </div>
 
   <div class="chronicle">

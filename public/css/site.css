@@ -583,6 +583,8 @@ a:hover { text-decoration: underline; }
   position: relative;
   max-height: 5.9em;          /* ~4 lines at 0.85rem / 1.75 */
   overflow: hidden;
+  margin-top: auto;           /* bio settles to the lower half of the fixed card */
+  padding-top: 1.1rem;
 }
 .living.center .stem p.truncated::after {   /* fade only when text actually overflows */
   content: "";
