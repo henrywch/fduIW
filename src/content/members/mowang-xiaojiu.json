@@ -1,0 +1,12 @@
+{
+  "name": "魔王与小玖",
+  "latin": "PRINCEPS & KIRIN",
+  "glyph": "flower",
+  "tags": { "zh": ["写作", "世界观"], "en": ["Prose", "Worldbuilding"] },
+  "blurb": {
+    "zh": "《杭城十二时辰》之作者。治下兼有青莲堂与茶园，善种奇幻之花。",
+    "en": "Author of \"Twelve Hours of Hangzhou\". Keeps both a hall and a tea garden; grows fantasy in rows."
+  },
+  "works": ["hangzhou-twelve-hours"],
+  "order": 1
+}

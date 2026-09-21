@@ -1,0 +1,12 @@
+{
+  "name": "浮光",
+  "latin": "DRIFTING LIGHT",
+  "glyph": "drift",
+  "tags": { "zh": ["写作", "人设"], "en": ["Prose", "Character design"] },
+  "blurb": {
+    "zh": "《白银时代》之作者。在流水线与银河之间浇铸白银。",
+    "en": "Author of \"The Silver Age\". Casts silver somewhere between the assembly line and the Milky Way."
+  },
+  "works": ["silver-age"],
+  "order": 4
+}

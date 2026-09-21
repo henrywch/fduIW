@@ -1,6 +1,11 @@
 ---
+import { getCollection } from "astro:content";
 import Base from "../../layouts/Base.astro";
 import Footer from "../../components/Footer.astro";
+import ChronItem from "../../components/ChronItem.astro";
+
+const entries = (await getCollection("activities"))
+  .sort((a, b) => Number(b.data.ongoing) - Number(a.data.ongoing) || b.data.date.localeCompare(a.data.date));
 ---
 <Base lang="en" title="The Chronicle · Hortus de Escapismo"
       description="Fiction festivals, joint projects and lectures: the monastery's chronicle."
@@ -18,52 +23,7 @@ import Footer from "../../components/Footer.astro";
   </div>
 
   <div class="chronicle">
-
-    <div class="chron-item ongoing">
-      <div class="living" style="display:block;cursor:default">
-        <div class="stem" style="padding:1.3rem 1.4rem 1.5rem">
-          <span class="mono meta">Ongoing · year-round</span>
-          <h3 style="margin:.35rem 0" class="latin">Open submissions<span class="badge-halo">ongoing</span></h3>
-          <p>Novels, paintings, OCs, worldbuilding — any form. After the gardeners' cataloguing it is hung in <a href="/en/works/">the Garden</a>. See the WeChat backstage for how to submit.</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="chron-item">
-      <div class="living" style="display:block;cursor:default">
-        <div class="stem" style="padding:1.3rem 1.4rem 1.5rem">
-          <span class="mono meta">2024-06-01 · Fiction Festival</span>
-          <h3 style="margin:.35rem 0" class="latin">1st "Gushihui" Fiction Festival — awards</h3>
-          <p>The four prizes found their owners:</p>
-          <ul style="margin:.2rem 0;font-size:.95rem;color:var(--ink-soft)">
-            <li>Best Fantasy / Most Promising · 《杭城十二时辰》 — 魔王与小玖</li>
-            <li>Best Sci-fi · 《你算命了吗》 — 旁观的好孩子</li>
-            <li>Best Mystery · 《婺城午夜电台札记》 — 林子环</li>
-            <li>Best Story / Best Characters · 《白银时代》 — 浮光</li>
-          </ul>
-          <p style="margin-bottom:0"><a href="/en/works/">To the Garden →</a></p>
-        </div>
-      </div>
-    </div>
-
-    <div class="chron-item">
-      <div class="living" style="display:block;cursor:default">
-        <div class="stem" style="padding:1.3rem 1.4rem 1.5rem">
-          <span class="mono meta">2024-05 · Fiction Festival</span>
-          <h3 style="margin:.35rem 0" class="latin">1st Fiction Festival — call &amp; review</h3>
-          <p>The club's first fiction festival. Submissions, peer review and the "editorially sanctioned masterpieces" selection all happened within the month.</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="chron-item">
-      <div class="card">
-        <span class="mono meta">Earlier · founding</span>
-        <h3 style="margin:.35rem 0" class="latin">The club is founded</h3>
-        <p style="color:var(--ink-soft);margin-bottom:0">Ground broken at Fudan. Not yet open to the public — we planted our own flowers first.</p>
-      </div>
-    </div>
-
+    {entries.map((e) => <ChronItem entry={e} lang="en" />)}
   </div>
 </div>
 

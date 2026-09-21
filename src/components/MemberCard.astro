@@ -1,0 +1,28 @@
+---
+// Renders one member card from the members collection.
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  member: CollectionEntry<"members">;
+  lang: "zh" | "en";
+}
+const { member, lang } = Astro.props;
+const d = member.data;
+
+const GLYPHS: Record<string, string> = {
+  flower:  '<path d="M24 8 C20 15 15 18 10 19 C15 20 20 24 24 31 C28 24 33 20 38 19 C33 18 28 15 24 8 Z"/><path d="M24 31 L24 40"/>',
+  lattice: '<circle cx="24" cy="24" r="13"/><path d="M24 11 v26 M11 24 h26 M16 16 l16 16 M32 16 L16 32"/>',
+  anchor:  '<path d="M12 36 V14 l8 10 8-10 v22"/><path d="M34 14 v22"/>',
+  drift:   '<path d="M14 38 L24 10 L34 38 M18 29 h12"/>',
+};
+const glyph = GLYPHS[d.glyph] || GLYPHS.flower;
+---
+<div class="living center" data-f="prose">
+  <div class="avatar"><svg viewBox="0 0 48 48" aria-hidden="true" set:html={glyph} /></div>
+  <div class="stem">
+    <h3 data-scramble={d.name}>{d.name}</h3>
+    <div class="meta">{d.latin}</div>
+    <div class="tags" style="margin-top:.5rem">{d.tags[lang].map((t) => <span class="tag">{t}</span>)}</div>
+    <p>{d.blurb[lang]}</p>
+  </div>
+</div>

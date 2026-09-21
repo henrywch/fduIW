@@ -1,0 +1,12 @@
+{
+  "name": "旁观的好孩子",
+  "latin": "LAPLACE'S OBSERVER",
+  "glyph": "lattice",
+  "tags": { "zh": ["写作", "科幻"], "en": ["Prose", "Sci-fi"] },
+  "blurb": {
+    "zh": "《你算命了吗》之作者。相信一切皆有定数，包括下一篇交稿日期。",
+    "en": "Author of \"Have You Had Your Fortune Told?\". Believes everything is predetermined, including the next deadline."
+  },
+  "works": ["cyber-fortune-telling"],
+  "order": 2
+}

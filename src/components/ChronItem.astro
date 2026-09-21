@@ -1,0 +1,33 @@
+---
+// Renders one chronicle entry from the activities collection.
+import { render } from "astro:content";
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  entry: CollectionEntry<"activities">;
+  lang: "zh" | "en";
+}
+const { entry, lang } = Astro.props;
+const d = entry.data;
+const { Content } = lang === "zh" ? await render(entry) : { Content: null };
+const titleClass = [lang === "en" && "latin"].filter(Boolean).join(" ") || undefined;
+---
+<div class:list={["chron-item", d.ongoing && "ongoing"]}>
+  {d.plainCard ? (
+    <div class="card">
+      <span class="mono meta">{d.meta[lang]}</span>
+      <h3 style="margin:.35rem 0" class={titleClass}>{d.title[lang]}</h3>
+      <p style="color:var(--ink-soft);margin-bottom:0">
+        {lang === "zh" && Content ? <Content /> : <span set:html={d.bodyEn} />}
+      </p>
+    </div>
+  ) : (
+    <div class="living" style="display:block;cursor:default">
+      <div class="stem" style="padding:1.3rem 1.4rem 1.5rem">
+        <span class="mono meta">{d.meta[lang]}</span>
+        <h3 style="margin:.35rem 0" class={titleClass}>{d.title[lang]}{d.ongoing && <span class="badge-halo">{lang === "zh" ? "进行中" : "ongoing"}</span>}</h3>
+        {lang === "zh" && Content ? <Content /> : <div set:html={d.bodyEn} />}
+      </div>
+    </div>
+  )}
+</div>
