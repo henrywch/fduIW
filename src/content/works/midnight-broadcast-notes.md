@@ -5,7 +5,7 @@ author: "林子环"
 date: "2024-06-01"
 cats: ["fantasy"]
 tags: ["悬疑", "林子环"]
-cover: "/assets/image/midnight-broadcast.jpg"
+cover: "../../assets/image/midnight-broadcast.jpg"
 latin: "Midnight Airwave Journals"
 source: "assets/label/2024-06-01-ð-çŒ城午夜电台札记.md"
 ---

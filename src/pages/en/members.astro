@@ -21,7 +21,7 @@ const members = (await getCollection("members")).sort((a, b) => a.data.order - b
     <p class="mono meta">REGISTER · as of the 1st Fiction Festival; the rest of the roll is being catalogued</p>
   </div>
 
-  <div class="wall" style="column-count:4;max-width:1100px">
+  <div class="wall wall-quad">
     {members.map((m) => <MemberCard member={m} lang="en" />)}
   </div>
 </div>

@@ -1,5 +1,6 @@
 ---
 import { getCollection, render } from "astro:content";
+import { Image } from "astro:assets";
 import Base from "../../layouts/Base.astro";
 
 export async function getStaticPaths() {
@@ -17,7 +18,8 @@ const d = work.data;
 
 <main>
   <div class="chapbook">
-    <div class="cover-rail"><img src={d.cover} alt={d.title + " 封面"}></div>
+    <div class="cover-rail"><Image src={d.cover} alt={d.title + " 封面"} widths={[320, 640]}
+                                   sizes="(max-width: 368px) calc(100vw - 3rem), 320px" loading="eager" /></div>
     <div class="chapbook-head">
       <div class="mono meta">CATALOGUE · {d.date} · 作者 {d.author}</div>
       <h1>{d.title}</h1>

@@ -5,7 +5,7 @@ author: "旁观的好孩子"
 date: "2024-06-01"
 cats: ["fantasy"]
 tags: ["科幻", "旁观的好孩子"]
-cover: "/assets/image/cyber-fortune-telling.png"
+cover: "../../assets/image/cyber-fortune-telling.png"
 latin: "Hast Thou Consulted Fate?"
 source: "assets/label/2024-06-01-你算命了吗.md"
 ---

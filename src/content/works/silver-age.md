@@ -5,7 +5,7 @@ author: "浮光"
 date: "2024-06-01"
 cats: ["fantasy"]
 tags: ["浮光"]
-cover: "/assets/image/sunset-factory.jpg"
+cover: "../../assets/image/sunset-factory.jpg"
 latin: "Argenteum Saeculum"
 source: "assets/label/2024-06-01-白银时代.md"
 ---

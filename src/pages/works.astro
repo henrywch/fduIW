@@ -1,7 +1,14 @@
 ---
 import { getCollection } from "astro:content";
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
 import Base from "../layouts/Base.astro";
 import Footer from "../components/Footer.astro";
+import imgHangzhouPanes from "../assets/image/杭城十二时辰-窗格.jpg";
+import imgHangzhouCoverFull from "../assets/image/杭城十二时辰-封面-全.jpg";
+import imgCyberFortuneTelling from "../assets/image/cyber-fortune-telling.png";
+import imgMidnightBroadcast from "../assets/image/midnight-broadcast.jpg";
+import imgSunsetFactory from "../assets/image/sunset-factory.jpg";
 
 const novels = new Map((await getCollection("works")).map((w) => [w.id.split("/").pop()!, w]));
 
@@ -9,13 +16,24 @@ const CAT_ZH = { fantasy: "幻想", illustration: "笔墨", workview: "世界观
 const catLabelZh = (c: string) => (CAT_ZH as Record<string, string>)[c] ?? c;
 const genreOf = (tags: string[]) => tags.filter((t) => ["奇幻", "科幻", "悬疑"].includes(t))[0] || "文";
 
-// web-sourced images dress headers only; the wall shows originals only
-const wall = [
-  { slug: "hangzhou-twelve-hours", img: "/assets/image/杭城十二时辰-窗格.jpg" },
-  { slug: "cyber-fortune-telling", img: "/assets/image/cyber-fortune-telling.png" },
-  { slug: "midnight-broadcast-notes", img: "/assets/image/midnight-broadcast.jpg" },
-  { slug: "silver-age", img: "/assets/image/sunset-factory.jpg" },
-  { cats: ["workview"], img: "/assets/image/杭城十二时辰-封面-全.jpg", alt: "青民谱系 节录", title: "青民谱系 · 节录",
+// mirrors .wall in site.css: 3 cols (max-width 1200px, 2rem side padding, 1.4rem gaps),
+// 2 cols ≤960px, 1 col ≤600px — sizes must follow the column width per viewport
+const wallSizes =
+  "(max-width: 600px) calc(100vw - 4rem), (max-width: 960px) calc((100vw - 5.4rem) / 2), (max-width: 1200px) calc((100vw - 6.8rem) / 3), 364px";
+
+// slug entries link to a work's detail page; the tail entry is a standalone piece
+// whose branch is selected via `"slug" in item` (astro check doesn't trust truthiness narrowing)
+type WallEntry =
+  | { slug: string; img: ImageMetadata }
+  | { cats: string[]; img: ImageMetadata; alt: string; title: string; meta: string; blurb?: string; href?: string };
+
+// web-sourced images dress headers only; wall art is processed at build time (astro:assets)
+const wall: WallEntry[] = [
+  { slug: "hangzhou-twelve-hours", img: imgHangzhouPanes },
+  { slug: "cyber-fortune-telling", img: imgCyberFortuneTelling },
+  { slug: "midnight-broadcast-notes", img: imgMidnightBroadcast },
+  { slug: "silver-age", img: imgSunsetFactory },
+  { cats: ["workview"], img: imgHangzhouCoverFull, alt: "青民谱系 节录", title: "青民谱系 · 节录",
     meta: "魔王与小玖 · 世界观设定", blurb: "妖盟、青莲堂与杭城，设定同《杭城十二时辰》共享一界",
     href: "/works/hangzhou-twelve-hours/" },
 ];
@@ -44,30 +62,35 @@ const wall = [
 
   <div class="wall">
 
-    {wall.map((item) => item.slug ? (() => {
-      const w = novels.get(item.slug)!;
+    {wall.map((item) => {
+      if ("slug" in item) {
+        const w = novels.get(item.slug)!;
+        return (
+          <a class="living" data-f={w.data.cats.join(" ")} href={`/works/${w.id.split("/").pop()}/`}>
+            <span class="medium-tag">{w.data.cats.map(catLabelZh).join(" · ")}</span>
+            <Image src={item.img} alt={w.data.title + " 封面"} loading="lazy" decoding="async"
+                   widths={[480, 960, 1600]} sizes={wallSizes} />
+            <div class="stem">
+              <h3 data-scramble={w.data.title}>{w.data.title}</h3>
+              <div class="meta">{w.data.author} · {w.data.date} · {genreOf(w.data.tags)}</div>
+              <p>{w.data.subtitle}</p>
+            </div>
+          </a>
+        );
+      }
       return (
-        <a class="living" data-f={w.data.cats.join(" ")} href={`/works/${w.id.split("/").pop()}/`}>
-          <span class="medium-tag">{w.data.cats.map(catLabelZh).join(" · ")}</span>
-          <img src={item.img} alt={w.data.title + " 封面"} loading="lazy" />
+        <a class="living" data-f={item.cats.join(" ")} href={item.href || item.img.src}>
+          <span class="medium-tag">{item.cats.map(catLabelZh).join(" · ")}</span>
+          <Image src={item.img} alt={item.alt} loading="lazy" decoding="async"
+                 widths={[480, 960, 1600]} sizes={wallSizes} />
           <div class="stem">
-            <h3 data-scramble={w.data.title}>{w.data.title}</h3>
-            <div class="meta">{w.data.author} · {w.data.date} · {genreOf(w.data.tags)}</div>
-            <p>{w.data.subtitle}</p>
+            <h3 data-scramble={item.title}>{item.title}</h3>
+            <div class="meta">{item.meta}</div>
+            {item.blurb && <p>{item.blurb}</p>}
           </div>
         </a>
       );
-    })() : (
-      <a class="living" data-f={item.cats.join(" ")} href={item.href || item.img}>
-        <span class="medium-tag">{item.cats.map(catLabelZh).join(" · ")}</span>
-        <img src={item.img} alt={item.alt} loading="lazy" />
-        <div class="stem">
-          <h3 data-scramble={item.title}>{item.title}</h3>
-          <div class="meta">{item.meta}</div>
-          {item.blurb && <p>{item.blurb}</p>}
-        </div>
-      </a>
-    ))}
+    })}
 
   </div>
 </div>

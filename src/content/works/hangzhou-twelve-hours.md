@@ -5,7 +5,7 @@ author: "魔王与小玖"
 date: "2024-05-29"
 cats: ["fantasy"]
 tags: ["奇幻", "魔王与小玖"]
-cover: "/assets/image/杭城十二时辰-封面.png"
+cover: "../../assets/image/杭城十二时辰-封面.png"
 latin: "Hora Duodecim Hangzhou"
 source: "assets/label/2024-05-29-杭城十二时辰.md"
 ---

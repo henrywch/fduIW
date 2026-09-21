@@ -37,13 +37,16 @@ const brandClass = lang === "en" ? "latin" : "";
 <html lang={lang === "zh" ? "zh-CN" : "en"} data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{title}</title>
 <meta name="description" content={description}>
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#F4EFE3">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#191D2A">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="stylesheet" href="/css/site.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:ital@0;1&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.cn">
+<link rel="preconnect" href="https://fonts.gstatic.cn" crossorigin>
+<link href="https://fonts.googleapis.cn/css2?family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:ital@0;1&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
 <script is:inline>
 (function(){var t=localStorage.getItem("hds-theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");var h=document.documentElement;h.setAttribute("data-theme",t);try{var lt=sessionStorage.getItem("hds-locale-turn");if(lt){h.classList.add("turn-arrive");h.setAttribute("data-turn-in",lt);setTimeout(function(){h.classList.remove("turn-arrive")},1600);}}catch(e){}})();
 </script>
@@ -62,7 +65,7 @@ const brandClass = lang === "en" ? "latin" : "";
 <header class:list={["site-header", headerClass]}>
   <a class="brand" href={t.homeHref}>
     <svg class="halo" viewBox="0 0 32 32" aria-hidden="true"><ellipse cx="16" cy="16" rx="13" ry="5.5" transform="rotate(-18 16 16)"/></svg>
-    <span class={brandClass}>{t.brand}</span>
+    <span class:list={["brand-name", brandClass]}>{t.brand}</span>
   </a>
   <nav class="site-nav">
     <a href={t.homeHref} class:list={[active === "about" && "active"]}>{t.navAbout}</a>

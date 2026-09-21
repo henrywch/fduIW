@@ -5,12 +5,12 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
     "preview": "astro preview",
     "sync:works": "node tools/sync_works.mjs",
     "members:open": "node tools/members_crypt.mjs decrypt",
     "members:lock": "node tools/members_crypt.mjs encrypt",
-    "build": "node tools/members_crypt.mjs decrypt || true && astro build",
+    "prebuild": "node tools/members_crypt.mjs decrypt || node -e \"process.exit(0)\"",
+    "build": "astro build",
     "check": "astro check"
   },
   "dependencies": {

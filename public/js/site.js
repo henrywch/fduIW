@@ -6,6 +6,49 @@
   var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   var isDark = function () { return root.getAttribute("data-theme") === "dark"; };
 
+  /* ---- adaptive quality ladder ----
+     saveData / weak silicon route straight to the degraded path (no WebGL,
+     far-layer petals only); deviceMemory and saveData are Chromium-only, so
+     iOS is covered by a conservative 1s rAF sample after load — degrade only
+     on a sustained >25ms mean frame interval. A fine-pointer capable desktop
+     trips none of these and keeps the original full-effects path. */
+  var saveData = !!(navigator.connection && navigator.connection.saveData);
+  var weakSoC = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4;
+  var degraded = saveData || weakSoC;
+  var degradedFx = [];   // teardowns for already-running effects, filled below
+  function degrade() {
+    if (degraded) return;
+    degraded = true;
+    for (var d = 0; d < degradedFx.length; d++) degradedFx[d]();
+  }
+  /* ---- rAF lifecycle: freeze every loop on pagehide / background tabs,
+     restart on regain with a fresh time base (per-loop start hooks) ---- */
+  var loopsLive = true, loopHooks = [], stopAt = 0;
+  function regLoop(stop, start) { loopHooks.push({ stop: stop, start: start }); }
+  function setLoops(live) {
+    if (live === loopsLive) return;
+    loopsLive = live;
+    var gap = live && stopAt ? performance.now() - stopAt : 0;
+    if (!live) stopAt = performance.now();
+    for (var l = 0; l < loopHooks.length; l++) live ? loopHooks[l].start(gap) : loopHooks[l].stop();
+  }
+  document.addEventListener("visibilitychange", function () { setLoops(!document.hidden); });
+  addEventListener("pagehide", function () { setLoops(false); });
+  addEventListener("pageshow", function () { setLoops(!document.hidden); });
+  if (!reduced && !degraded) {
+    addEventListener("load", function () {
+      var prev = 0, sum = 0, n = 0;
+      requestAnimationFrame(function sample(now) {
+        if (degraded) return;
+        if (document.hidden) { prev = 0; requestAnimationFrame(sample); return; }
+        if (prev) { sum += now - prev; n++; }
+        prev = now;
+        if (sum < 1000) requestAnimationFrame(sample);
+        else if (n && sum / n > 25) degrade();
+      });
+    });
+  }
+
   /* ============ locale page-turn ============
      zh→en turns from the left hinge (codex); en→zh from the right (thread-bound
      books open on the right). State passes through sessionStorage so the
@@ -90,8 +133,9 @@
   var glc = document.getElementById("gl");
   var vigil = document.querySelector(".vigil");
   if (glc && vigil) {
-    var gl = glc.getContext("webgl");
+    var gl = degraded ? null : glc.getContext("webgl");   // degraded: never touch WebGL
     var mouse = [0.5, 0.5];
+    var glVisible = true;
     if (gl && !reduced) {
       var vsrc = "attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}";
       var fsrc = [
@@ -144,13 +188,23 @@
           uM = gl.getUniformLocation(prog, "m"),
           uD = gl.getUniformLocation(prog, "d");
       function size() {
-        glc.width = innerWidth * devicePixelRatio;
-        glc.height = innerHeight * devicePixelRatio;
+        // DPR cap 2 leaves DPR<=2 desktops at today's resolution; coarse
+        // pointers / small screens render at 3/4 of a 1.5 cap and let the
+        // CSS 100% stretch upscale the result
+        var dpr = Math.min(devicePixelRatio || 1, 2);
+        if (matchMedia("(pointer: coarse)").matches || innerWidth < 768) {
+          dpr = Math.min(dpr, 1.5) * 0.75;
+          glc.width = Math.round(innerWidth * dpr);
+          glc.height = Math.round(innerHeight * dpr);
+        } else {
+          glc.width = innerWidth * dpr;
+          glc.height = innerHeight * dpr;
+        }
         gl.viewport(0, 0, glc.width, glc.height);
       }
       size(); addEventListener("resize", size);
-      var t0 = performance.now(), glVisible = true;
-      (function frame() {
+      var t0 = performance.now(), glRaf = 0, glGone = false;
+      function glFrame() {
         if (glVisible || Math.abs(dayNow - dayTarget) > 0.002) {
           dayNow += (dayTarget - dayNow) * 0.05;
           gl.uniform2f(uR, glc.width, glc.height);
@@ -159,8 +213,20 @@
           gl.uniform1f(uD, glVisible ? dayNow : dayTarget); // seamless handoff when scrolled past
           gl.drawArrays(gl.TRIANGLES, 0, 3);
         }
-        requestAnimationFrame(frame);
-      })();
+        glRaf = requestAnimationFrame(glFrame);
+      }
+      glFrame();
+      regLoop(
+        function () { cancelAnimationFrame(glRaf); },
+        function (gap) { if (!glGone) { t0 += gap; glRaf = requestAnimationFrame(glFrame); } }
+      );
+      degradedFx.push(function () {   // late fps-degrade: tear down to the static gradient
+        glGone = true;
+        cancelAnimationFrame(glRaf);
+        glc.style.background = isDark()
+          ? "radial-gradient(ellipse at 50% 30%, #2a2f42, #161A26)"
+          : "radial-gradient(ellipse at 50% 30%, #fdf9ee, #F4EFE3)";
+      });
       // pause shading when the walk fully covers the vigil
       addEventListener("scroll", function () {
         glVisible = window.scrollY < innerHeight * 1.4;
@@ -244,20 +310,25 @@
     var cue = document.querySelector(".scroll-cue");
     var header = document.querySelector(".site-header");
     var petalC = document.getElementById("petals"), shade = document.querySelector(".vigil-shade");
-    var eased = window.scrollY;
-    (function pump() {
+    var eased = window.scrollY, pumpRaf = 0;
+    function pump() {
       eased += (window.scrollY - eased) * 0.12;
-      var k = Math.min(eased / (innerHeight * 0.92), 1);
-      if (content) {
-        content.style.transform = "translateY(" + (-eased * 0.42) + "px) scale(" + (1 - k * 0.06) + ")";
-        content.style.opacity = 1 - k * 1.1;
+      if (glVisible) {   // hero long off-screen: skip the style writes entirely
+        var k = Math.min(eased / (innerHeight * 0.92), 1);
+        if (content) {
+          content.style.transform = "translateY(" + (-eased * 0.42) + "px) scale(" + (1 - k * 0.06) + ")";
+          content.style.opacity = 1 - k * 1.1;
+        }
+        if (cue) cue.style.opacity = Math.max(0, 1 - eased / 200);
+        if (header) header.classList.toggle("over-abyss", eased < innerHeight * 0.6);
+        if (petalC) petalC.style.opacity = 1 - k;
+        if (shade) shade.style.opacity = 1 - k * 0.6;
       }
-      if (cue) cue.style.opacity = Math.max(0, 1 - eased / 200);
-      if (header) header.classList.toggle("over-abyss", eased < innerHeight * 0.6);
-      if (petalC) petalC.style.opacity = 1 - k;
-      if (shade) shade.style.opacity = 1 - k * 0.6;
-      requestAnimationFrame(pump);
-    })();
+      pumpRaf = requestAnimationFrame(pump);
+    }
+    pump();
+    regLoop(function () { cancelAnimationFrame(pumpRaf); },
+            function () { pumpRaf = requestAnimationFrame(pump); });
 
     /* ---------- petals over the vigil ----------
        sakura-petal silhouettes (notched tip, rounded lobes) in gold / blush /
@@ -290,11 +361,12 @@
         a: far ? 0.16 + Math.random() * 0.14 : 0.32 + Math.random() * 0.18
       };
     }
-    var N_NEAR = reduced ? 0 : (innerWidth < 720 ? 6 : 14), N_FAR = reduced ? 0 : (innerWidth < 720 ? 12 : 22);
+    var N_NEAR = reduced || degraded ? 0 : (innerWidth < 720 ? 6 : 14),
+        N_FAR = reduced ? 0 : degraded ? 6 : (innerWidth < 720 ? 12 : 22);
     for (var i = 0; i < N_NEAR + N_FAR; i++) P.push(spawnPetal(true, i >= N_NEAR));
     if (P.length) {
-      var lastT = performance.now(), gust = 0, lastScr = window.scrollY;
-      (function petalFrame(now) {
+      var lastT = performance.now(), gust = 0, lastScr = window.scrollY, petalRaf = 0;
+      function petalFrame(now) {
         now = now || performance.now();
         if (petalC.style.opacity !== "0") {
           var dt = Math.min((now - lastT) / 16.7, 3);      // clamp: no lurch after a background tab
@@ -329,8 +401,15 @@
         }
         lastT = now;
         lastScr = window.scrollY;
-        requestAnimationFrame(petalFrame);
-      })(performance.now());
+        petalRaf = requestAnimationFrame(petalFrame);
+      }
+      petalFrame(performance.now());
+      regLoop(function () { cancelAnimationFrame(petalRaf); },
+              function () { lastT = performance.now(); petalRaf = requestAnimationFrame(petalFrame); });
+      degradedFx.push(function () {   // late fps-degrade: near layer off, far layer to <=6
+        for (var j = P.length - 1; j >= 0; j--) if (!P[j].far) P.splice(j, 1);
+        while (P.length > 6) P.pop();
+      });
     }
   } // end vigil
 
@@ -356,7 +435,7 @@
       if (k < 1) requestAnimationFrame(tick);
     })(performance.now());
   }
-  if (!reduced) {
+  if (!reduced && matchMedia("(hover: hover) and (pointer: fine)").matches) {
     document.querySelectorAll("[data-scramble]").forEach(function (el) {
       var target = el.dataset.scramble || el.textContent.trim();
       el.dataset.scramble = target;
@@ -428,8 +507,8 @@
     }
     var tX = -1, tY = -1, sX = -1, sY = -1, have = false;
     addEventListener("pointermove", function (e) { tX = e.clientX; tY = e.clientY; have = true; }, { passive: true });
-    var lastD = performance.now();
-    (function dust(now) {
+    var lastD = performance.now(), dustRaf = 0;
+    function dust(now) {
       now = now || performance.now();
       var dt = Math.min((now - lastD) / 16.7, 3); lastD = now;
       if (have) {
@@ -465,14 +544,17 @@
         c2.drawImage(SPK[p.spr], -24 * sc, -24 * sc, 48 * sc, 48 * sc);
         c2.restore();
       }
-      requestAnimationFrame(dust);
-    })(performance.now());
+      dustRaf = requestAnimationFrame(dust);
+    }
+    dust(performance.now());
+    regLoop(function () { cancelAnimationFrame(dustRaf); },
+            function () { lastD = performance.now(); dustRaf = requestAnimationFrame(dust); });
   } else if (pollen) {
     pollen.remove();   // no trace layer at all on touch or reduced motion
   }
 
   /* ============ magnetic 3d tilt ============ */
-  if (!reduced) {
+  if (!reduced && matchMedia("(hover: hover) and (pointer: fine)").matches) {
     document.querySelectorAll(".living, .door").forEach(function (card) {
       card.addEventListener("pointermove", function (e) {
         var r = card.getBoundingClientRect();

@@ -11,7 +11,7 @@ const LABEL_DIR = path.join(ROOT, "assets", "label");
 const OUT_DIR = path.join(ROOT, "src", "content", "works");
 const REGISTRY = path.join(ROOT, "src", "content", "works.registry.jsonl");
 
-// slug -> { label file, cover (under /assets/image/), latin tagline }
+// slug -> { label file, cover (under src/assets/image/), latin tagline }
 const WORKS = [
   { slug: "hangzhou-twelve-hours", file: "2024-05-29-杭城十二时辰.md",
     cover: "杭城十二时辰-封面.png", latin: "Hora Duodecim Hangzhou" },
@@ -76,7 +76,7 @@ function main() {
       `date: ${yamlString(date)}`,
       `cats: ["fantasy"]`,
       `tags: [${tags.map(yamlString).join(", ")}]`,
-      `cover: ${yamlString("/assets/image/" + w.cover)}`,
+      `cover: ${yamlString("../../assets/image/" + w.cover)}`,
       `latin: ${yamlString(w.latin)}`,
       `source: ${yamlString("assets/label/" + path.basename(p))}`,
       "---",
@@ -89,7 +89,7 @@ function main() {
 
     lines.push(JSON.stringify({
       slug: w.slug, title, author: meta.author || "", date,
-      cats: ["fantasy"], cover: "/assets/image/" + w.cover, latin: w.latin,
+      cats: ["fantasy"], cover: "../../assets/image/" + w.cover, latin: w.latin,
     }));
   }
   fs.writeFileSync(REGISTRY, lines.join("\n") + "\n");

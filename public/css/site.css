@@ -58,13 +58,20 @@ html { scroll-behavior: smooth; }
   body.home .vigil, body.home .doorway, body.home .epilogue { scroll-snap-align: start; scroll-snap-stop: always; }
   body.home .site-footer { scroll-snap-align: end; }
 }
+/* short/landscape touch screens only: mandatory snap + snap-stop:always can make a
+   station taller than the viewport unreachable; disable snap and trim the padding */
+@media (pointer: coarse) and (max-height: 500px) {
+  html:has(body.home) { scroll-snap-type: none; }
+  body.home .doorway { scroll-snap-align: none; scroll-snap-stop: normal; padding-top: 2rem; padding-bottom: 2rem; }
+  body.home .scroll-cue { display: none; }
+}
 .epilogue { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; justify-content: center; }
 
 body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
-  font-family: "Noto Serif SC", "Songti SC", "SimSun", serif;
+  font-family: "Noto Serif SC", "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", "STSong", "SimSun", serif;
   font-size: 1.05rem;
   line-height: 1.85;
   transition: background 0.5s ease, color 0.4s ease;
@@ -131,6 +138,7 @@ a:hover { text-decoration: underline; }
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 1.6rem;
+  padding-top: calc(0.75rem + env(safe-area-inset-top, 0px));  /* notch-safe; env() is 0 on desktop */
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid transparent;
@@ -174,7 +182,7 @@ a:hover { text-decoration: underline; }
   cursor: pointer;
   transition: border-color 0.3s, transform 0.2s;
 }
-.toggle-btn:hover { border-color: var(--primary); transform: translateY(-1px); text-decoration: none; }
+/* :hover lift gated to hover-capable fine pointers — see the touch/adaptations zone at EOF */
 
 /* ============ vigil hero ============ */
 
@@ -190,12 +198,8 @@ a:hover { text-decoration: underline; }
   cursor: default;
   transition: opacity 0.45s ease, color 0.45s ease, text-shadow 0.45s ease, letter-spacing 0.45s ease;
 }
-.scatter:hover {
-  opacity: 1;
-  color: var(--primary-soft);
-  text-shadow: 0 0 18px rgba(224, 192, 122, 0.55);
-  letter-spacing: 0.22em;
-}
+/* :hover illumination gated to hover-capable fine pointers (see EOF); a (hover: none)
+   rule raises the resting opacity there, since hover is the only reveal */
 @media (max-width: 720px) { .scatter { font-size: 0.68rem; } }
 
 /* day-mode readability on the vigil map */
@@ -206,7 +210,6 @@ a:hover { text-decoration: underline; }
 [data-theme="light"] .scroll-cue { color: #7A7266; }
 [data-theme="light"] .vigil .big-halo ellipse { stroke: #8A6A26; }
 [data-theme="light"] .scatter { color: #2A2620; }
-[data-theme="light"] .scatter:hover { color: #8A6A26; text-shadow: 0 0 16px rgba(201, 164, 92, 0.7); }
 [data-theme="light"] .site-header.over-abyss {
   background: rgba(247, 243, 234, 0.55);
   mix-blend-mode: normal;
@@ -241,6 +244,7 @@ a:hover { text-decoration: underline; }
   position: relative;
   z-index: 10;
   min-height: 100vh;
+  min-height: 100svh;  /* small-viewport fallback chain, same pattern as .doorway's vh/dvh */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -289,6 +293,7 @@ a:hover { text-decoration: underline; }
 .scroll-cue {
   position: absolute;
   bottom: 2rem;
+  bottom: calc(2rem + env(safe-area-inset-bottom, 0px));  /* home-indicator safe area */
   left: 50%;
   transform: translateX(-50%);
   font-family: "JetBrains Mono", monospace;
@@ -331,6 +336,11 @@ a:hover { text-decoration: underline; }
   overflow: hidden;
   white-space: nowrap;
   padding: 0.8rem 0;
+  background: #F1EADA;  /* solid equivalent of the mix below over --bg (light tokens); dark below */
+  background: color-mix(in srgb, var(--primary) 7%, transparent);
+}
+[data-theme="dark"] .band {
+  background: #272830;  /* solid equivalent over dark --bg */
   background: color-mix(in srgb, var(--primary) 7%, transparent);
 }
 .band span {
@@ -363,16 +373,21 @@ a:hover { text-decoration: underline; }
   will-change: transform;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
-.door:hover { text-decoration: none; border-color: var(--primary); }
+/* .door:hover gated to (hover: hover) and (pointer: fine) — see the EOF adaptations zone */
 .door.rev { grid-template-columns: 1fr minmax(240px, 42%); }
 .door.rev .door-window-side { order: 2; }
 
 .door-window-side {
   position: relative;
   padding: 2.2rem 2.2rem 0;
+  background: linear-gradient(#FFFFFF, #F9F6F0);  /* solid-stops fallback of the mix below (light); dark below */
   background: linear-gradient(var(--surface), color-mix(in srgb, var(--bg) 55%, var(--surface)));
   display: flex;
   align-items: flex-end;
+}
+[data-theme="dark"] .door-window-side {
+  background: linear-gradient(#212637, #1D2130);
+  background: linear-gradient(var(--surface), color-mix(in srgb, var(--bg) 55%, var(--surface)));
 }
 
 /* the arch: saturated field inside a gold double frame */
@@ -387,6 +402,10 @@ a:hover { text-decoration: underline; }
   align-items: flex-end;
   justify-content: center;
   overflow: hidden;
+  background:
+    radial-gradient(ellipse 90% 55% at 50% 108%, rgba(95, 127, 89, 0.55) 0%, transparent 62%),
+    radial-gradient(ellipse 70% 45% at 50% -18%, rgba(201, 164, 92, 0.45) 0%, transparent 58%),
+    var(--bg);
   background:
     radial-gradient(ellipse 90% 55% at 50% 108%, color-mix(in srgb, var(--accent) 55%, transparent) 0%, transparent 62%),
     radial-gradient(ellipse 70% 45% at 50% -18%, color-mix(in srgb, var(--primary) 45%, transparent) 0%, transparent 58%),
@@ -449,7 +468,7 @@ a:hover { text-decoration: underline; }
   gap: 0.5rem;
 }
 .door-body .enter svg { width: 22px; height: 22px; stroke: currentColor; fill: none; transition: transform 0.35s ease; }
-.door:hover .enter svg { transform: translateX(6px); }
+/* .door:hover .enter svg nudge gated to (hover: hover) and (pointer: fine) — see EOF zone */
 
 @media (max-width: 720px) {
   .door, .door.rev { grid-template-columns: 1fr; }
@@ -467,7 +486,7 @@ a:hover { text-decoration: underline; }
   padding: 1.3rem 1.4rem;
   transition: transform 0.25s ease, border-color 0.25s ease;
 }
-.card:hover { transform: translateY(-3px); border-color: var(--primary); }
+/* .card:hover lift gated to (hover: hover) and (pointer: fine) — see EOF zone */
 
 .meta { font-variant: small-caps; letter-spacing: 0.06em; }
 
@@ -511,10 +530,14 @@ a:hover { text-decoration: underline; }
   cursor: pointer;
   transition: background 0.25s, color 0.25s, border-color 0.25s;
 }
-.seed.active, .seed:hover { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+.seed.active { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+/* .seed:hover (same fill) gated to (hover: hover) and (pointer: fine) — see EOF zone */
 
 /* living cards: magnetic tilt + scramble + bloom filter */
 .wall { column-count: 3; column-gap: 1.4rem; max-width: 1200px; margin: 0 auto; padding: 0 2rem 6rem; }
+/* members register uses class="wall wall-quad"; declared before the .wall breakpoints so the
+   equal-specificity media rules below still collapse it 4 → 2 → 1 on narrow screens */
+.wall-quad { column-count: 4; max-width: 1100px; }
 @media (max-width: 960px) { .wall { column-count: 2; } }
 @media (max-width: 600px) { .wall { column-count: 1; } }
 
@@ -534,12 +557,10 @@ a:hover { text-decoration: underline; }
   position: relative;
   transition: border-color 0.3s;
 }
-.living:hover { border-color: var(--primary); text-decoration: none; }
+/* .living:hover border/img-zoom/title-color gated to (hover: hover) and (pointer: fine) — see EOF zone */
 .living img { width: 100%; display: block; transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1), filter 0.5s; }
-.living:hover img { transform: scale(1.06); filter: saturate(1.15); }
 .living .stem { padding: 1rem 1.1rem 1.2rem; transform: translateZ(30px); }
 .living .stem h3 { font-size: 1.12rem; color: var(--ink); margin: 0; letter-spacing: 0.05em; }
-.living:hover .stem h3 { color: var(--primary); }
 .living .stem .meta { font-family: "JetBrains Mono", monospace; font-size: 0.66rem; letter-spacing: 0.14em; color: var(--accent); margin-top: 0.3rem; }
 .living .stem p { font-size: 0.85rem; color: var(--ink-soft); margin: 0.5rem 0 0; line-height: 1.75; }
 .living.bloom { animation: bloom-in 0.6s cubic-bezier(0.19, 1, 0.22, 1); }
@@ -552,12 +573,18 @@ a:hover { text-decoration: underline; }
   font-family: "JetBrains Mono", monospace;
   font-size: 0.62rem;
   letter-spacing: 0.18em;
+  background: rgba(22, 26, 38, 0.78);               /* --vigil-bg 78% over transparent (theme-fixed token) */
   background: color-mix(in srgb, var(--vigil-bg) 78%, transparent);
+  border: 1px solid rgba(178, 84, 62, 0.55);        /* light --petal 55%; dark override below */
   border: 1px solid color-mix(in srgb, var(--petal) 55%, transparent);
   color: var(--petal);
   padding: 0.15rem 0.6rem;
   border-radius: 999px;
   z-index: 2;
+}
+[data-theme="dark"] .medium-tag {
+  border-color: rgba(205, 122, 100, 0.55);
+  border-color: color-mix(in srgb, var(--petal) 55%, transparent);
 }
 
 /* living card avatar variant (members) */
@@ -606,7 +633,7 @@ a:hover { text-decoration: underline; }
   padding: 0.15rem 0.2rem;
   cursor: pointer;
 }
-.living.center .more:hover { border-bottom-color: var(--primary); }
+/* .living.center .more:hover underline tint gated to (hover: hover) and (pointer: fine) — see EOF zone */
 .living.center .more[hidden] { display: none; }
 
 /* unfold-over-the-wall layer: expanded bio floats above the frozen grid */
@@ -653,7 +680,7 @@ a:hover { text-decoration: underline; }
   font-size: 0.9rem; color: var(--muted);
   background: none; border: none; cursor: pointer; padding: 0.3rem;
 }
-.cardfloat .close:hover { color: var(--primary); }
+/* .cardfloat .close:hover tint gated to (hover: hover) and (pointer: fine) — see EOF zone */
 
 .tags { display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: center; }
 .tag {
@@ -686,6 +713,11 @@ a:hover { text-decoration: underline; }
 }
 .chron-item.ongoing::before {
   background: var(--accent);
+  box-shadow: 0 0 0 4px rgba(95, 127, 89, 0.3);   /* light --accent 30%; dark override below */
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+[data-theme="dark"] .chron-item.ongoing::before {
+  box-shadow: 0 0 0 4px rgba(143, 176, 137, 0.3);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 .badge-halo {
@@ -730,7 +762,7 @@ main { max-width: 1060px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
 
 /* ============ footer ============ */
 
-.site-footer { border-top: 1px solid var(--hairline); padding: 2.4rem 1.5rem; position: relative; z-index: 10; background: var(--bg); transition: background 0.5s ease; }
+.site-footer { border-top: 1px solid var(--hairline); padding: 2.4rem 1.5rem; padding-bottom: calc(2.4rem + env(safe-area-inset-bottom, 0px)); position: relative; z-index: 10; background: var(--bg); transition: background 0.5s ease; }
 .footer-cols { max-width: 1060px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 2rem; }
 .site-footer h4 { color: var(--primary); margin: 0 0 0.6rem; font-size: 1rem; }
 .site-footer p, .site-footer li { color: var(--ink-soft); font-size: 0.9rem; margin: 0.25rem 0; }
@@ -830,8 +862,75 @@ html.turn-arrive[data-theme="dark"] { background: #191D2A; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
+  /* view-transition pseudos aren't matched by the universal ::before/::after reset above */
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none !important; }
   .reveal { opacity: 1; translate: none; }
   .dropline > span { transform: none; }
   .vigil-title .ch { opacity: 1; transform: none; }
   html { scroll-behavior: auto; }
+}
+
+/* ============ mobile adaptations ============================================
+   Everything below is gated to narrow viewports or coarse/hover-less pointers —
+   the fine-pointer wide-viewport (desktop) path renders exactly as before.
+   ========================================================================== */
+
+/* compact one-row header + sub-12px type floors, ≤600px only */
+@media (max-width: 600px) {
+  .site-header { padding: 0.5rem 0.9rem; }
+  .brand-name, .brand > span { display: none; }        /* the halo glyph remains the home link */
+  .site-nav { flex-wrap: nowrap; gap: 0.5rem; }
+  .site-nav > a { font-size: 0.85rem; }
+  .living .stem .meta { font-size: 0.75rem; }          /* 0.66rem */
+  .door-body .meta { font-size: 0.75rem; }             /* 0.68rem */
+  .medium-tag { font-size: 0.75rem; }                  /* 0.62rem */
+  .living.center .more { font-size: 0.75rem; }         /* 0.7rem */
+  .scroll-cue { font-size: 0.75rem; }                  /* 0.65rem; also hidden on short screens above */
+  html[lang="zh-CN"] .chapter p,
+  html[lang="zh-CN"] .chapbook article,
+  html[lang="zh-CN"] .living .stem p,
+  html[lang="zh-CN"] .site-footer p,
+  html[lang="zh-CN"] .site-footer li { line-break: strict; }  /* CLReq prohibition rules; lang is on <html> */
+}
+
+/* long .scatter lines wrap instead of clipping, ≤400px (EN sentences ~70 chars) */
+@media (max-width: 400px) {
+  .scatter { white-space: normal; max-width: 78vw; }
+}
+
+/* decorative hover effects only where hover is real and precise (M3);
+   plain link underline stays ungated — it is the affordance */
+@media (hover: hover) and (pointer: fine) {
+  .toggle-btn:hover { border-color: var(--primary); transform: translateY(-1px); text-decoration: none; }
+  .scatter:hover { opacity: 1; color: var(--primary-soft); text-shadow: 0 0 18px rgba(224, 192, 122, 0.55); letter-spacing: 0.22em; }
+  [data-theme="light"] .scatter:hover { color: #8A6A26; text-shadow: 0 0 16px rgba(201, 164, 92, 0.7); }
+  .door:hover { text-decoration: none; border-color: var(--primary); }
+  .door:hover .enter svg { transform: translateX(6px); }
+  .card:hover { transform: translateY(-3px); border-color: var(--primary); }
+  .seed:hover { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+  .living:hover { border-color: var(--primary); text-decoration: none; }
+  .living:hover img { transform: scale(1.06); filter: saturate(1.15); }
+  .living:hover .stem h3 { color: var(--primary); }
+  .living.center .more:hover { border-bottom-color: var(--primary); }
+  .cardfloat .close:hover { color: var(--primary); }
+}
+
+/* hover was the scatter lines' only reveal — keep them readable without it */
+@media (hover: none) {
+  .scatter { opacity: 0.7; }
+}
+
+/* tap targets + touch feedback + tag overflow, coarse pointers only */
+@media (pointer: coarse) {
+  .living:active, .door:active, .seed:active, .toggle-btn:active { transform: scale(0.98); }
+  a, button, .seed { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  .site-nav > a, .toggle-btn, .seed, .living.center .more, .site-footer a { position: relative; }
+  /* invisible hit-area bleed: ≥36px tall targets; 44px for .close / .more */
+  .site-nav > a::after, .toggle-btn::after, .seed::after, .site-footer a::after {
+    content: ""; position: absolute; inset: -8px -4px;
+  }
+  .living.center .more::after, .cardfloat .close::after {
+    content: ""; position: absolute; inset: -10px;
+  }
+  .living.center .tags { overflow-x: auto; }           /* clipped tags scroll instead */
 }
