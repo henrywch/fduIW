@@ -25,7 +25,8 @@ const out = (cmd, args, env = {}) =>
   execFileSync(cmd, args, { cwd: ROOT, env: { ...process.env, ...env } }).toString().trim();
 
 fs.rmSync(OUT, { recursive: true, force: true });
-run("npm", ["run", "build"], { GH_PAGES_BASE: BASE, MSYS_NO_PATHCONV: "1" });
+// invoke astro's CLI directly — execFileSync can't spawn "npm" (a .cmd) without a shell on Windows
+run("node", ["node_modules/astro/astro.js", "build"], { GH_PAGES_BASE: BASE, MSYS_NO_PATHCONV: "1" });
 
 // .nojekyll: Pages would otherwise Jekyll-filter the _astro/ asset folder away
 fs.writeFileSync(path.join(OUT, ".nojekyll"), "");
