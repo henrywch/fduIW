@@ -23,6 +23,7 @@ const glyph = GLYPHS[d.glyph] || GLYPHS.flower;
     <h3 data-scramble={d.name}>{d.name}</h3>
     <div class="meta">{d.latin}</div>
     <div class="tags" style="margin-top:.5rem">{d.tags[lang].map((t) => <span class="tag">{t}</span>)}</div>
+    <button class="more" type="button" aria-expanded="false" hidden>{lang === "zh" ? "展閱全文" : "Read more"}</button>
     <p>{d.blurb[lang]}</p>
   </div>
 </div>

@@ -502,7 +502,87 @@
     document.querySelectorAll(".reveal").forEach(function (el) { io2.observe(el); });
   }
 
-  /* ============ living wall filter (multi-label: a work may sit in several cats) ============ */
+  /* ============ member bios: 4-line fade + unfold-over-the-wall reveal ============
+     truncated only when the bio actually overflows; unfolding floats a layer
+     above the frozen grid (rows never reflow) — a lifted manuscript leaf */
+  var bios = document.querySelectorAll(".living.center .stem > p");
+  if (bios.length) {
+    var veilEl = null, floatEl = null, activeMore = null;
+    function reflowBios() {
+      bios.forEach(function (p) {
+        var btn = p.parentNode.querySelector(".more");
+        p.classList.remove("truncated");
+        if (p.scrollHeight > p.clientHeight + 2) {
+          p.classList.add("truncated");
+          btn.hidden = false;
+        } else btn.hidden = true;
+      });
+    }
+    reflowBios();
+    addEventListener("load", reflowBios);
+    addEventListener("resize", reflowBios);
+    function closeFloat() {
+      if (!floatEl) return;
+      var f = floatEl, v = veilEl, back = activeMore;
+      floatEl = null; veilEl = null; activeMore = null;
+      if (back) back.setAttribute("aria-expanded", "false");
+      if (v) v.classList.remove("open");
+      if (back) {
+        var r0 = back.closest(".living").getBoundingClientRect();
+        f.style.top = r0.top + "px"; f.style.left = r0.left + "px";
+        f.style.width = r0.width + "px"; f.style.height = r0.height + "px";
+      }
+      document.body.style.overflow = "";
+      setTimeout(function () { f.remove(); if (v) v.remove(); if (back) back.focus(); }, 420);
+    }
+    function openFloat(card, moreBtn) {
+      var zh = document.documentElement.lang === "zh-CN";
+      var stem = card.querySelector(".stem").cloneNode(true);
+      var clonedMore = stem.querySelector(".more");
+      if (clonedMore) clonedMore.remove();
+      veilEl = document.createElement("div");
+      veilEl.className = "cardfloat-veil";
+      floatEl = document.createElement("div");
+      floatEl.className = "cardfloat";
+      floatEl.setAttribute("role", "dialog");
+      floatEl.setAttribute("aria-modal", "true");
+      var av = card.querySelector(".avatar");
+      if (av) floatEl.appendChild(av.cloneNode(true));
+      var x = document.createElement("button");
+      x.className = "close"; x.type = "button";
+      x.setAttribute("aria-label", zh ? "收起" : "Close");
+      x.textContent = "×";
+      floatEl.appendChild(x);
+      floatEl.appendChild(stem);
+      // start exactly over the card, then unfold to fit the full text
+      var r0 = card.getBoundingClientRect();
+      floatEl.style.top = r0.top + "px"; floatEl.style.left = r0.left + "px";
+      floatEl.style.width = r0.width + "px"; floatEl.style.height = r0.height + "px";
+      document.body.appendChild(veilEl); document.body.appendChild(floatEl);
+      var w = Math.min(r0.width * 1.15, 420, innerWidth * 0.92);
+      var h = Math.min(floatEl.scrollHeight, innerHeight * 0.8);
+      var t2 = Math.max(16, Math.min(r0.top + r0.height / 2 - h / 2, innerHeight - h - 16));
+      var l2 = Math.max(16, Math.min(r0.left + r0.width / 2 - w / 2, innerWidth - w - 16));
+      requestAnimationFrame(function () {
+        veilEl.classList.add("open");
+        floatEl.style.top = t2 + "px"; floatEl.style.left = l2 + "px";
+        floatEl.style.width = w + "px"; floatEl.style.height = h + "px";
+        x.focus();
+      });
+      document.body.style.overflow = "hidden";
+      activeMore = moreBtn; moreBtn.setAttribute("aria-expanded", "true");
+      x.addEventListener("click", closeFloat);
+      veilEl.addEventListener("click", closeFloat);
+      floatEl.addEventListener("keydown", function (e) { if (e.key === "Escape") closeFloat(); });
+    }
+    bios.forEach(function (p) {
+      var card = p.closest(".living");
+      var btn = p.parentNode.querySelector(".more");
+      btn.addEventListener("click", function () { openFloat(card, btn); });
+    });
+  }
+
+  /* living wall filter (multi-label: a work may sit in several cats) ========= */
   var seeds = document.querySelectorAll(".seed");
   if (seeds.length) {
     seeds.forEach(function (s) {

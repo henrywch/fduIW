@@ -574,6 +574,81 @@ a:hover { text-decoration: underline; }
 .living .avatar svg { width: 46px; height: 46px; stroke: var(--primary); fill: none; stroke-width: 1.4; }
 .living.center .stem { text-align: center; padding-top: 0.4rem; }
 
+/* members: fixed-height cards, bio dissolves at the bottom edge when truncated */
+.living.center { height: 23rem; display: flex; flex-direction: column; }
+.living.center .stem { flex: 1; display: flex; flex-direction: column; min-height: 0; padding-bottom: 1rem; }
+.living.center .tags { flex-wrap: nowrap; overflow: hidden; }
+.living.center .stem p {
+  order: 1;                   /* DOM keeps [more] before the bio (a11y); visually bio first */
+  position: relative;
+  max-height: 5.9em;          /* ~4 lines at 0.85rem / 1.75 */
+  overflow: hidden;
+}
+.living.center .stem p.truncated::after {   /* fade only when text actually overflows */
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: 1.6em;
+  background: linear-gradient(transparent, var(--surface) 65%);
+  pointer-events: none;
+}
+.living.center .more {
+  order: 2;
+  align-self: center;
+  margin: 0.5rem 0 0;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  color: var(--primary);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--hairline);
+  padding: 0.15rem 0.2rem;
+  cursor: pointer;
+}
+.living.center .more:hover { border-bottom-color: var(--primary); }
+.living.center .more[hidden] { display: none; }
+
+/* unfold-over-the-wall layer: expanded bio floats above the frozen grid */
+.cardfloat-veil {
+  position: fixed; inset: 0; z-index: 490;
+  background: rgba(14, 16, 25, 0.42);
+  -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+  opacity: 0; transition: opacity 0.3s ease;
+}
+.cardfloat-veil.open { opacity: 1; }
+.cardfloat {
+  position: fixed; z-index: 500;
+  display: flex; flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--primary);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  transition: top 0.38s cubic-bezier(0.19, 1, 0.22, 1), left 0.38s cubic-bezier(0.19, 1, 0.22, 1),
+              width 0.38s cubic-bezier(0.19, 1, 0.22, 1), height 0.38s cubic-bezier(0.19, 1, 0.22, 1);
+}
+.cardfloat .avatar {
+  width: 72px; height: 72px;
+  margin: 1.8rem auto 0.2rem;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle at 35% 30%, var(--surface), var(--bg));
+  border: 1px solid var(--hairline);
+  overflow: hidden; flex: none;
+}
+.cardfloat .avatar svg { width: 40px; height: 40px; stroke: var(--primary); fill: none; stroke-width: 1.4; }
+.cardfloat .stem { padding: 0.6rem 1.8rem 2rem; overflow-y: auto; min-height: 0; }
+.cardfloat h3 { margin-bottom: 0.2rem; }
+.cardfloat .tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.4rem 0 0.9rem; justify-content: center; }
+.cardfloat .stem p { font-size: 0.95rem; line-height: 1.9; }
+.cardfloat .close {
+  position: absolute; top: 0.6rem; right: 0.9rem;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.9rem; color: var(--muted);
+  background: none; border: none; cursor: pointer; padding: 0.3rem;
+}
+.cardfloat .close:hover { color: var(--primary); }
+
 .tags { display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: center; }
 .tag {
   font-size: 0.75rem;
