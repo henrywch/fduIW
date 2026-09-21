@@ -583,8 +583,7 @@ a:hover { text-decoration: underline; }
   position: relative;
   max-height: 5.9em;          /* ~4 lines at 0.85rem / 1.75 */
   overflow: hidden;
-  margin-top: auto;           /* bio settles to the lower half of the fixed card */
-  padding-top: 1.1rem;
+  margin-top: 0.95rem;        /* fixed ratio below the tags — not bottom-anchored */
 }
 .living.center .stem p.truncated::after {   /* fade only when text actually overflows */
   content: "";
@@ -639,7 +638,12 @@ a:hover { text-decoration: underline; }
   overflow: hidden; flex: none;
 }
 .cardfloat .avatar svg { width: 40px; height: 40px; stroke: var(--primary); fill: none; stroke-width: 1.4; }
-.cardfloat .stem { padding: 0.6rem 1.8rem 2rem; overflow-y: auto; min-height: 0; }
+.cardfloat .stem {
+  padding: 0.6rem 1.8rem 2rem;
+  overflow-y: auto; min-height: 0;
+  scrollbar-width: none; -ms-overflow-style: none;   /* scrollable, but no visible scrollbar */
+}
+.cardfloat .stem::-webkit-scrollbar { display: none; }
 .cardfloat h3 { margin-bottom: 0.2rem; }
 .cardfloat .tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.4rem 0 0.9rem; justify-content: center; }
 .cardfloat .stem p { font-size: 0.95rem; line-height: 1.9; }
