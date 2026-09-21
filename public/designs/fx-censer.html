@@ -22,54 +22,65 @@
 <main>
   <h1>祈尘 · 上行</h1>
   <div class="latin">FX D · CENSER DUST · STILL RISE, CURSOR DRAWS</div>
-  <p>静止时香尘自然上升；指尖划过之处，香尘随轨迹旋起又散去。<br>研究出处：gooey/liquid cursor 轨迹、烟雾上升模型。</p>
+  <p>静止时香尘自然上升；指尖划过之处，尘随轨迹旋起又散——生成改由 rAF 采样：9px 距离阈值、单帧预算 ≤5、沿步长插值，疾挥不成墙。<br>研究出处：gooey/liquid cursor 轨迹、烟雾上升模型、thread C-2（rAF-sampled, velocity-threshold spawn）。</p>
 </main>
 <script>
 var cvs=document.getElementById("c"), ctx=cvs.getContext("2d");
-ctx.globalCompositeOperation="lighter";  // dark bg: particles add light
 var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-function size(){cvs.width=innerWidth*devicePixelRatio;cvs.height=innerHeight*devicePixelRatio}
+var coarse = matchMedia("(pointer: coarse)").matches;
+var DPR = Math.min(devicePixelRatio||1, 2);
+function size(){
+  cvs.width=innerWidth*DPR; cvs.height=innerHeight*DPR;
+  ctx.setTransform(DPR,0,0,DPR,0,0);      // canvas resize resets context state — re-apply both
+  ctx.globalCompositeOperation="lighter"; // dark bg: particles add light
+}
 size(); addEventListener("resize", size);
 
-var parts=[];
-function seed(x,y,ambient){
+var CAP = 360, parts=[];
+function seed(x,y,ambient,ix,iy){
   parts.push({
     x:x,y:y,
-    vx:(Math.random()-.5)*0.35*devicePixelRatio,
-    vy: ambient ? (-0.15-Math.random()*0.35)*devicePixelRatio : (-0.3-Math.random()*0.6)*devicePixelRatio,
-    r:(1.8+Math.random()*3.4)*devicePixelRatio,
+    vx:(ix||0)*0.06 + (Math.random()-.5)*0.35,   // cursor dust inherits a whiff of the stroke
+    vy: ambient ? (-0.15-Math.random()*0.35) : (-0.3-Math.random()*0.6),
+    r: 1.8+Math.random()*3.4,
     life:1, decay: ambient ? 0.0008+Math.random()*0.0014 : 0.009+Math.random()*0.009,
     warm: Math.random()<0.7
   });
 }
 // prefill the whole canvas so the field is alive from frame one
-for (var j=0;j<70;j++) seed(Math.random()*cvs.width, Math.random()*cvs.height, true);
+for (var j=0;j<70;j++) seed(Math.random()*innerWidth, Math.random()*innerHeight, true);
 
-var mx=-99,my=-99,px=-99,py=-99;
-addEventListener("pointermove",function(e){
-  var nx=e.clientX*devicePixelRatio, ny=e.clientY*devicePixelRatio;
-  if(px>-99 && parts.length<220){
-    var ddx=nx-px, ddy=ny-py, dd=Math.sqrt(ddx*ddx+ddy*ddy);
-    var steps=Math.min(6, Math.floor(dd/(8*devicePixelRatio)));
-    for(var i=0;i<steps;i++){
-      var k=i/(steps||1);
-      seed(px+ddx*k + (Math.random()-.5)*8, py+ddy*k + (Math.random()-.5)*8, false);
-    }
-  }
-  px=nx; py=ny;
-});
-addEventListener("pointerleave",function(){px=py=-99});
+// events only record the latest position; spawning happens in the frame loop
+var tX=-1,tY=-1,sX=-1,sY=-1,acc=0,have=false;
+if (!coarse){
+  addEventListener("pointermove",function(e){ tX=e.clientX; tY=e.clientY; have=true; },{passive:true});
+  addEventListener("pointerleave",function(){ have=false; sX=sY=-1; });
+}
 
 function frame(t){
-  ctx.clearRect(0,0,cvs.width,cvs.height);
-  // slow ambient spawn: always something rising — denser base rain now
-  if (!reduced && Math.random() < 0.55 && parts.length < 320) {
-    seed(Math.random()*cvs.width, cvs.height + 10, true);
+  // slow ambient spawn: always something rising
+  if (!reduced && Math.random() < 0.55 && parts.length < CAP) {
+    seed(Math.random()*innerWidth, innerHeight + 10, true);
   }
+  // distance-threshold spawns with a velocity-scaled per-frame budget
+  if (have){
+    if (sX<0){ sX=tX; sY=tY; }
+    var dx=tX-sX, dy=tY-sY, v=Math.hypot(dx,dy);
+    acc+=v;
+    var budget = v>40 ? 5 : v>16 ? 3 : 1, n=0;
+    while (acc>=9 && n<budget && parts.length<CAP){
+      acc-=9; n++;
+      var k = 1 - acc/(v||1);   // walk along this frame's movement, oldest step first
+      seed(sX+dx*k + (Math.random()-.5)*8, sY+dy*k + (Math.random()-.5)*8, false, dx, dy);
+    }
+    sX=tX; sY=tY;
+  }
+  if (parts.length>CAP) parts.splice(0, parts.length-CAP);  // evict oldest, never grow unbounded
+  ctx.clearRect(0,0,innerWidth,innerHeight);
   for (var i=parts.length-1;i>=0;i--){
     var p=parts[i];
     // gentle spiraling while rising
-    p.x += p.vx + Math.sin(t*0.001 + p.y*0.01)*0.3*devicePixelRatio;
+    p.x += p.vx + Math.sin(t*0.001 + p.y*0.01)*0.3;
     p.y += p.vy;
     p.life -= p.decay;
     if (p.life<=0 || p.y < -20){ parts.splice(i,1); continue; }
@@ -82,7 +93,7 @@ function frame(t){
 }
 requestAnimationFrame(frame);
 // one frame so reduced-motion gets a static dusting
-for (var j=0;j<40;j++) frame(0);
+for (var z=0;z<40;z++) frame(0);
 </script>
 </body>
 </html>

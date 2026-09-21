@@ -21,55 +21,64 @@
 <canvas id="c"></canvas>
 <main>
   <h1>风舞 · 瓣</h1>
-  <div class="latin">FX A · BREEZE PETALS</div>
-  <p>三维翻滚 + 风的阵风层：每片花瓣有自己的相位与升力。<br>研究出处：sakura.js 摆动类目、CodePen 风场粒子、Godot 风驱花瓣。</p>
+  <div class="latin">FX A · BREEZE PETALS · 2 DEPTH BANDS</div>
+  <p>两条深度带（远＝小·淡·慢，风感弱；近＝大·亮·快）+ 一条共享低频风正弦——像天气，不像雨；<br>每片花瓣自有相位、翻滚与二次微颤，下落速度随尺寸。研究出处：jhammann/sakura、CodePen 风场粒子、thread C-1。</p>
 </main>
 <script>
 var cvs = document.getElementById("c"), ctx = cvs.getContext("2d");
 var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-function size(){ cvs.width = innerWidth * devicePixelRatio; cvs.height = innerHeight * devicePixelRatio; }
+var DPR = Math.min(devicePixelRatio || 1, 2);   // research: cap DPR at 2 — overdraw, not count, is the cost
+function size(){ cvs.width = innerWidth * DPR; cvs.height = innerHeight * DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); }
 size(); addEventListener("resize", size);
 
-var N = 26, petals = [];
-function spawn(init){
+// two depth bands; all coordinates in CSS px after the transform
+var N_FAR = 16, N_NEAR = 10, petals = [];
+function spawn(init, far){
+  var r = far ? (1.6 + Math.random()*1.8) : (3.2 + Math.random()*4.2);
   return {
-    x: Math.random()*cvs.width,
-    y: init ? Math.random()*cvs.height : -30*devicePixelRatio,
-    r: (3.5 + Math.random()*4.5) * devicePixelRatio,   // petal radius
-    vy: (0.35 + Math.random()*0.65) * devicePixelRatio,  // fall speed
+    far: far,
+    x: Math.random()*innerWidth,
+    y: init ? Math.random()*innerHeight : -30,
+    r: r,
+    vy: (far ? 0.22 : 0.4) + Math.random()*0.3 + r*0.07,  // fall speed tied to size
     phase: Math.random()*Math.PI*2,        // sway phase
-    phaseV: 0.008 + Math.random()*0.012,   // sway frequency
+    phaseV: 0.006 + Math.random()*0.010,   // sway frequency
     tumble: Math.random()*Math.PI*2,       // 3d tumble angle
     tumbleV: (Math.random()-.5)*0.05,      // tumble rate
+    wq: 0.4 + Math.random()*0.5, wph: Math.random()*Math.PI*2,  // slow secondary wobble
     hue: Math.random(),
   };
 }
-for (var i=0;i<N;i++) petals.push(spawn(true));
+for (var i=0;i<N_FAR+N_NEAR;i++) petals.push(spawn(true, i < N_FAR));
 
-// gusty wind: two sines + a third slow one, gives breathing rather than a fixed breeze
+// shared weather wind: two low sines + a fast whisper — breathing, not a fixed breeze
 function wind(t, y){
   return Math.sin(t*0.0007 + y*0.002) * 0.45
        + Math.sin(t*0.00018 + 2.0) * 0.6
        + Math.sin(t*0.0031) * 0.08;
 }
 
+var last = performance.now();
 function frame(t){
-  ctx.clearRect(0,0,cvs.width,cvs.height);
+  var dt = Math.min((t - last)/16.7, 3);   // clamp: no lurch returning from a background tab
+  last = t;
+  ctx.clearRect(0,0,innerWidth,innerHeight);
   for (var p of petals){
-    p.phase += p.phaseV;
-    p.tumble += p.tumbleV;
-    var w = wind(t, p.y) * devicePixelRatio;
-    p.x += w + Math.sin(p.phase)*0.4*devicePixelRatio;
-    p.y += p.vy * (0.85 + Math.sin(p.phase*0.7)*0.3) ;
-    if (p.y > cvs.height + 40) { Object.assign(p, spawn(false)); continue; }
-    if (p.x < -60) p.x = cvs.width + 50;
-    if (p.x > cvs.width + 60) p.x = -50;
+    p.phase += p.phaseV * dt;
+    p.tumble += p.tumbleV * dt;
+    var w = wind(t, p.y) * (p.far ? 0.4 : 1);   // the far band barely feels the wind
+    p.x += (w + Math.sin(p.phase)*0.4) * dt;
+    p.y += p.vy * (0.85 + Math.sin(p.phase*0.7)*0.3) * dt;
+    if (p.y > innerHeight + 40) { Object.assign(p, spawn(false, p.far)); continue; }
+    if (p.x < -60) p.x = innerWidth + 50;
+    if (p.x > innerWidth + 60) p.x = -50;
 
     // petal: stretched ellipse, tumbling around vertical axis (rotateY feel via width squish)
     var squish = Math.cos(p.tumble);             // 1..-1
-    var rot = Math.sin(p.phase) * 0.6;
-    var alpha = 0.25 + 0.45*Math.abs(squish);    // edge-on petals fade
-    var r = p.hue < 0.55 ? "224,192,122" : (p.hue < 0.85 ? "143,176,137" : "205,122,100");
+    var rot = Math.sin(p.phase) * 0.6 + Math.sin(t*0.001*p.wq + p.wph) * 0.25;  // sway + secondary wobble
+    var shade = 0.25 + 0.45*Math.abs(squish);    // edge-on petals fade
+    var alpha = p.far ? shade*0.45 : shade;      // far = dim
+    var r = p.hue < 0.55 ? "224,192,122" : (p.hue < 0.85 ? "235,226,205" : "160,184,145");  // gold / vellum / leaf
     ctx.save();
     ctx.translate(p.x, p.y);
     ctx.rotate(rot);
@@ -82,7 +91,7 @@ function frame(t){
   }
   if (!reduced) requestAnimationFrame(frame);
 }
-requestAnimationFrame(frame);
+requestAnimationFrame(frame);   // reduced motion: one still drift of petals, then no loop
 </script>
 </body>
 </html>

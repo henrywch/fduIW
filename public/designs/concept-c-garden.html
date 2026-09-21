@@ -134,7 +134,7 @@
   </a>
 </div>
 
-<footer>CONCEPT C · MAGNETIC TILT · TEXT-SCRAMBLE DECODE · POLLEN TRAIL · FILTER MORPH</footer>
+<footer>CONCEPT C · MAGNETIC TILT · TEXT-SCRAMBLE DECODE · RING-BUFFER POLLEN TRAIL · FILTER MORPH</footer>
 
 <script>
 (function () {
@@ -183,33 +183,62 @@
     t.addEventListener("pointerenter", function () { decode(t); });
   }
 
-  /* ---------- 3. pollen cursor trail ---------- */
+  /* ---------- 3. pollen cursor trail ----------
+     thread C-2 recipe: rAF-sampled (never raw mousemove), distance-threshold
+     spawns with a velocity-scaled budget, fixed 72-slot ring buffer,
+     multiplicative age-fade; fine pointers only, native cursor untouched */
   var c = document.getElementById("pollen"), x2 = c.getContext("2d");
-  var parts = [];
-  function sizeC() { c.width = innerWidth; c.height = innerHeight; }
-  sizeC(); addEventListener("resize", sizeC);
-  if (!reduced) addEventListener("pointermove", function (e) {
-    if (parts.length < 120) {
-      parts.push({
-        x: e.clientX, y: e.clientY,
-        vx: (Math.random() - .5) * 1.2, vy: (Math.random() - .5) * 1.2 - .4,
-        life: 1, r: 1 + Math.random() * 2.2,
-        col: ["224,192,122", "143,176,137", "205,122,100"][(Math.random() * 3) | 0]
-      });
+  if (!reduced && matchMedia("(pointer: fine)").matches) {
+    var cDpr = Math.min(devicePixelRatio || 1, 2);
+    function sizeC() {
+      c.width = Math.round(innerWidth * cDpr); c.height = Math.round(innerHeight * cDpr);
+      x2.setTransform(cDpr, 0, 0, cDpr, 0, 0);
     }
-  });
-  (function dust() {
-    x2.clearRect(0, 0, c.width, c.height);
-    for (var i = parts.length - 1; i >= 0; i--) {
-      var p = parts[i];
-      p.x += p.vx; p.y += p.vy; p.life -= 0.02;
-      if (p.life <= 0) { parts.splice(i, 1); continue; }
-      x2.beginPath();
-      x2.fillStyle = "rgba(" + p.col + "," + (p.life * 0.65) + ")";
-      x2.arc(p.x, p.y, p.r * p.life, 0, Math.PI * 2); x2.fill();
+    sizeC(); addEventListener("resize", sizeC);
+    var RING = 72, slots = [], head = 0, si;
+    // gold-heavy / vellum / a touch of leaf
+    var POOLC = ["224,192,122", "224,192,122", "224,192,122", "235,226,205", "235,226,205", "143,176,137"];
+    for (si = 0; si < RING; si++) slots.push({ x: 0, y: 0, vx: 0, vy: 0, life: 0, r: 0, col: "224,192,122" });
+    function puff(x, y, dx, dy) {
+      var p = slots[head]; head = (head + 1) % RING;              // overwrite the oldest spec
+      p.x = x + (Math.random() - 0.5) * 6; p.y = y + (Math.random() - 0.5) * 6;
+      p.vx = dx * 0.12 + (Math.random() - 0.5) * 0.7;             // inherit a whiff of cursor velocity
+      p.vy = dy * 0.12 + (Math.random() - 0.5) * 0.7 - 0.25;
+      p.life = 1; p.r = 1.1 + Math.random() * 2;
+      p.col = POOLC[(Math.random() * POOLC.length) | 0];
     }
-    requestAnimationFrame(dust);
-  })();
+    var tX = 0, tY = 0, sX = 0, sY = 0, acc = 0, have = false;
+    addEventListener("pointermove", function (e) { tX = e.clientX; tY = e.clientY; have = true; }, { passive: true });
+    (function dust() {
+      if (have) {
+        var dx = tX - sX, dy = tY - sY, v = Math.hypot(dx, dy);
+        acc += v;
+        var budget = v > 40 ? 4 : v > 16 ? 3 : 2, n = 0;
+        while (acc >= 9 && n < budget) {
+          acc -= 9; n++;
+          var k = 1 - acc / (v || 1);                             // walk along this frame's move
+          puff(sX + dx * k, sY + dy * k, dx, dy);
+        }
+        sX = tX; sY = tY;
+      }
+      x2.clearRect(0, 0, innerWidth, innerHeight);
+      for (var i = 0; i < RING; i++) {
+        var p = slots[i];
+        if (p.life <= 0) continue;
+        p.life *= 0.94;                                           // multiplicative age-fade
+        if (p.life < 0.02) { p.life = 0; continue; }
+        p.vx *= 0.97; p.vy = p.vy * 0.97 - 0.01;
+        p.x += p.vx; p.y += p.vy;
+        x2.beginPath();
+        x2.fillStyle = "rgba(" + p.col + "," + (p.life * 0.6) + ")";
+        x2.arc(p.x, p.y, p.r * p.life, 0, Math.PI * 2);
+        x2.fill();
+      }
+      requestAnimationFrame(dust);
+    })();
+  } else {
+    c.remove();   // no trace layer at all on touch or reduced motion
+  }
 
   /* ---------- 4. filter -> bloom morph ---------- */
   var seeds = document.querySelectorAll(".seed");

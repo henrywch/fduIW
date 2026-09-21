@@ -94,7 +94,7 @@
   </section>
 </main>
 
-<footer>CONCEPT A · WEBGL FBM STAINED-GLASS · CANVAS PETALS · KINETIC TITLE</footer>
+<footer>CONCEPT A · QUARTER-RES FBM GLASS + FROZEN REDUCED-MOTION FRAME · 2-BAND PETALS · SCROLL-LERPED WIND · KINETIC TITLE</footer>
 
 <script>
 (function () {
@@ -103,10 +103,11 @@
 
   /* ---------- 1. WebGL stained-glass: value-noise fbm fragment shader ---------- */
   var canvas = document.getElementById("gl");
-  var gl = canvas.getContext("webgl");
-  var mouse = [0.5, 0.5];
+  // research: request a lean context — no depth/stencil, no alpha, low-power GPU is fine for ambience
+  var gl = canvas.getContext("webgl", { alpha: false, antialias: false, depth: false, stencil: false, powerPreference: "low-power" });
+  var mouseT = [0.5, 0.5], mouseS = [0.5, 0.5];
 
-  if (gl && !reduced) {
+  if (gl) {
     var vsrc = "attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}";
     var fsrc = [
       "precision highp float;",
@@ -148,35 +149,56 @@
     gl.enableVertexAttribArray(loc);
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
     var uR = gl.getUniformLocation(prog, "r"), uT = gl.getUniformLocation(prog, "t"), uM = gl.getUniformLocation(prog, "m");
+    // research: fullscreen fbm costs per-pixel × octaves — render at half dimensions
+    // (quarter pixel rate), DPR capped at 2, and let the compositor upscale
+    var dpr = Math.min(devicePixelRatio || 1, 2);
     function size() {
-      canvas.width = innerWidth * devicePixelRatio; canvas.height = innerHeight * devicePixelRatio;
+      canvas.width = Math.max(2, Math.round(innerWidth * dpr * 0.5));
+      canvas.height = Math.max(2, Math.round(innerHeight * dpr * 0.5));
       gl.viewport(0, 0, canvas.width, canvas.height);
     }
     size(); addEventListener("resize", size);
-    var t0 = performance.now();
-    (function frame() {
+    function render(tSec) {
       gl.uniform2f(uR, canvas.width, canvas.height);
-      gl.uniform1f(uT, (performance.now() - t0) / 1000);
-      gl.uniform2f(uM, mouse[0], mouse[1]);
+      gl.uniform1f(uT, tSec);
+      gl.uniform2f(uM, mouseS[0], mouseS[1]);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
-      requestAnimationFrame(frame);
-    })();
+    }
+    if (!reduced) {
+      var t0 = performance.now(), heroVisible = true;
+      // stop shading once the hero is scrolled past — no pixels nobody can see
+      addEventListener("scroll", function () { heroVisible = window.scrollY < innerHeight * 1.2; }, { passive: true });
+      (function frame() {
+        if (heroVisible) {
+          mouseS[0] += (mouseT[0] - mouseS[0]) * 0.08;  // lerped light = soft decay, not jitter
+          mouseS[1] += (mouseT[1] - mouseS[1]) * 0.08;
+          render((performance.now() - t0) / 1000);      // time from performance.now: no fake resume after background tabs
+        }
+        requestAnimationFrame(frame);
+      })();
+    } else {
+      // prefers-reduced-motion → one frozen frame of glass, kept current on resize
+      addEventListener("resize", function () { render(6.5); });
+      render(6.5);
+    }
   } else {
     document.body.style.background = "radial-gradient(ellipse at 50% 30%, #2a2f42, #161A26)";
   }
 
-  /* ---------- 2. mouse -> halo sway + shader light ---------- */
+  /* ---------- 2. mouse -> halo sway + shader light (fine motion only) ---------- */
   var halo = document.getElementById("halo");
   var tx = 0, ty = 0, cx = 0, cy = 0;
-  addEventListener("pointermove", function (e) {
-    mouse[0] = e.clientX / innerWidth; mouse[1] = 1 - e.clientY / innerHeight;
-    tx = (e.clientX / innerWidth - 0.5) * 26; ty = (e.clientY / innerHeight - 0.5) * 18;
-  });
-  (function swayer() {
-    cx += (tx - cx) * 0.06; cy += (ty - cy) * 0.06;
-    halo.style.transform = "translate(" + cx + "px," + cy + "px) rotate(" + (cx * 0.35) + "deg)";
-    requestAnimationFrame(swayer);
-  })();
+  if (!reduced) {
+    addEventListener("pointermove", function (e) {
+      mouseT[0] = e.clientX / innerWidth; mouseT[1] = 1 - e.clientY / innerHeight;
+      tx = (e.clientX / innerWidth - 0.5) * 26; ty = (e.clientY / innerHeight - 0.5) * 18;
+    }, { passive: true });
+    (function swayer() {
+      cx += (tx - cx) * 0.06; cy += (ty - cy) * 0.06;
+      halo.style.transform = "translate(" + cx + "px," + cy + "px) rotate(" + (cx * 0.35) + "deg)";
+      requestAnimationFrame(swayer);
+    })();
+  }
 
   /* ---------- 3. kinetic split-char title ---------- */
   var title = document.getElementById("kinTitle");
@@ -212,34 +234,66 @@
   var mi = 0;
   if (!reduced) setInterval(function () { mi = (mi + 1) % messages.length; scramble(tick, messages[mi], 1200); }, 6000);
 
-  /* ---------- 5. petals on canvas ---------- */
+  /* ---------- 5. petals over the vigil — two depth bands ----------
+     far = small·dim·slow and barely feels the wind; fall speed tied to size;
+     one shared low-frequency wind sine = weather, not rain; scroll velocity
+     feeds the gust term, lerped back to calm (darkroom pattern) */
   var pc = document.getElementById("petals"), px = pc.getContext("2d");
-  var P = [], N = reduced ? 0 : 22;
-  function sizeP() { pc.width = innerWidth; pc.height = innerHeight; }
+  var P = [];
+  var pDpr = Math.min(devicePixelRatio || 1, 2);
+  function sizeP() {
+    pc.width = Math.round(innerWidth * pDpr); pc.height = Math.round(innerHeight * pDpr);
+    px.setTransform(pDpr, 0, 0, pDpr, 0, 0);
+  }
   sizeP(); addEventListener("resize", sizeP);
-  function spawn(init) {
+  // gold-heavy, vellum next, leaf rare — the vigil palette
+  function pcol() {
+    var k = Math.random();
+    return k < 0.55 ? "rgba(224,192,122," : k < 0.85 ? "rgba(235,226,205," : "rgba(160,184,145,";
+  }
+  function spawnPetal(init, far) {
+    var r = far ? 1.3 + Math.random() * 1.6 : 2.6 + Math.random() * 3.1;
     return {
-      x: Math.random() * innerWidth, y: init ? Math.random() * innerHeight : -20,
-      r: 2.5 + Math.random() * 4, vy: .35 + Math.random() * .8, vx: (Math.random() - .5) * .4,
-      rot: Math.random() * Math.PI * 2, vr: (Math.random() - .5) * .02,
-      sway: Math.random() * Math.PI * 2,
-      col: ["rgba(224,192,122,", "rgba(143,176,137,", "rgba(205,122,100,"][(Math.random() * 3) | 0],
-      a: .18 + Math.random() * .3
+      far: far,
+      baseX: Math.random() * innerWidth, driftX: 0,
+      y: init ? Math.random() * innerHeight : -24,
+      r: r,
+      vy: (far ? 0.22 : 0.4) + Math.random() * 0.25 + r * 0.09,  // fall speed tied to size
+      amp: far ? 12 + Math.random() * 12 : 24 + Math.random() * 16,
+      fq: 0.35 + Math.random() * 0.5, ph: Math.random() * 6.2832,
+      rot: Math.random() * 6.2832, vr: (Math.random() - 0.5) * 0.02,
+      wq: 0.5 + Math.random() * 0.7, wph: Math.random() * 6.2832,
+      col: pcol(),
+      a: far ? 0.1 + Math.random() * 0.12 : 0.22 + Math.random() * 0.18
     };
   }
-  for (var i = 0; i < N; i++) P.push(spawn(true));
-  (function petalFrame(t) {
-    px.clearRect(0, 0, pc.width, pc.height);
-    P.forEach(function (p, i) {
-      p.sway += .008; p.x += p.vx + Math.sin(p.sway) * .5; p.y += p.vy; p.rot += p.vr;
-      if (p.y > innerHeight + 24) P[i] = spawn(false);
-      px.save(); px.translate(p.x, p.y); px.rotate(p.rot);
-      px.fillStyle = p.col + p.a + ")";
-      px.beginPath(); px.ellipse(0, 0, p.r * 2, p.r, 0, 0, Math.PI * 2); px.fill();
-      px.restore();
-    });
-    requestAnimationFrame(petalFrame);
-  })();
+  var N_NEAR = reduced ? 0 : (innerWidth < 720 ? 4 : 9), N_FAR = reduced ? 0 : (innerWidth < 720 ? 8 : 15);
+  for (var i = 0; i < N_NEAR + N_FAR; i++) P.push(spawnPetal(true, i >= N_NEAR));
+  if (P.length) {
+    var lastT = performance.now(), gust = 0, lastScr = window.scrollY;
+    (function petalFrame(now) {
+      now = now || performance.now();
+      var dt = Math.min((now - lastT) / 16.7, 3);      // clamp: no lurch returning from a background tab
+      lastT = now;
+      gust += (Math.max(-2.2, Math.min(2.2, (window.scrollY - lastScr) * 0.028)) - gust) * 0.06 * dt;
+      lastScr = window.scrollY;
+      var weather = Math.sin(now / 1000 * 0.22) * 0.22, t = now / 1000;
+      px.clearRect(0, 0, innerWidth, innerHeight);
+      P.forEach(function (p, i) {
+        p.y += p.vy * dt;
+        p.driftX += (weather + gust) * (p.far ? 0.35 : 1) * dt;
+        var x = p.baseX + Math.sin(t * p.fq + p.ph) * p.amp + p.driftX;
+        p.rot += (p.vr + Math.sin(t * p.wq + p.wph) * 0.006) * dt;   // slow secondary wobble
+        if (p.y > innerHeight + 24) { P[i] = spawnPetal(false, p.far); return; }
+        if (x < -60) p.driftX += innerWidth + 120; else if (x > innerWidth + 60) p.driftX -= innerWidth + 120;
+        px.save(); px.translate(x, p.y); px.rotate(p.rot);
+        px.fillStyle = p.col + p.a + ")";
+        px.beginPath(); px.ellipse(0, 0, p.r * 2, p.r, 0, 0, Math.PI * 2); px.fill();
+        px.restore();
+      });
+      requestAnimationFrame(petalFrame);
+    })(performance.now());
+  }
 
   /* ---------- 6. section reveal ---------- */
   var io = new IntersectionObserver(function (es) {

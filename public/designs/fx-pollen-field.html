@@ -22,45 +22,56 @@
 <main>
   <h1>草木花粉 · 场</h1>
   <div class="latin">FX B · POLLEN FIELD · AMBIENT + ATTRACT</div>
-  <p>整屏常驻花粉缓慢漂流；指尖经过时，花粉向指尖聚拢再弹开——共感。<br>研究出处：firefly.js 萤火、CSS fireflies、ambient field 粒子。</p>
+  <p>整屏常驻花粉缓慢漂流（每帧随机抖动换成慢正弦漫游——响而不噪）；指尖进入约 150px 半径时，花粉向平滑后的指尖聚拢再弹开——共感。<br>研究出处：firefly.js 萤火、Rauno Freiberg 交互半径（~150px soft decay）、thread C-2「responsive, not noisy」；粗糙指针下仅剩纯漂流。</p>
 </main>
 <script>
 var cvs = document.getElementById("c"), ctx = cvs.getContext("2d");
 var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-function size(){ cvs.width=innerWidth*devicePixelRatio; cvs.height=innerHeight*devicePixelRatio; }
+var coarse = matchMedia("(pointer: coarse)").matches;   // no cursor layer on touch — ambience only
+var DPR = Math.min(devicePixelRatio || 1, 2);
+function size(){ cvs.width = innerWidth * DPR; cvs.height = innerHeight * DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); }
 size(); addEventListener("resize", size);
 
-var N=90, seeds=[];
+var N = coarse ? 60 : 90, seeds = [];   // visible count ≤ ~90 — overdraw, not count, is the cost (bloom halo ×2)
 for (var i=0;i<N;i++) seeds.push({
-  x: Math.random()*cvs.width, y: Math.random()*cvs.height,
-  vx:(Math.random()-.5)*.25*devicePixelRatio, vy:(Math.random()-.5)*.25*devicePixelRatio,
-  r:(0.8+Math.random()*2.2)*devicePixelRatio,
+  x: Math.random()*innerWidth, y: Math.random()*innerHeight,
+  vx:(Math.random()-.5)*.2, vy:(Math.random()-.5)*.2,
+  r: 0.8+Math.random()*2.2,
   tw: Math.random()*Math.PI*2, twV: 0.008+Math.random()*0.02,
+  wq: 0.3+Math.random()*0.6, wph: Math.random()*Math.PI*2,   // slow wander; no per-frame jitter
   k: Math.random()  // attract coefficient per seed
 });
-var mx=-9999,my=-9999;
-addEventListener("pointermove",function(e){mx=e.clientX*devicePixelRatio;my=e.clientY*devicePixelRatio;});
-addEventListener("pointerleave",function(){mx=my=-9999});
+// events only record the target; the frame loop samples + lerps it (soft decay)
+var mT = [-9999, -9999], m = [-9999, -9999];
+if (!coarse) {
+  addEventListener("pointermove", function(e){ mT[0]=e.clientX; mT[1]=e.clientY; }, { passive: true });
+  addEventListener("pointerleave", function(){ mT[0]=mT[1]=-9999; });
+}
 
+var RADIUS = 150, last = performance.now();   // ~150px of influence (rauno.me reference)
 function frame(t){
-  ctx.clearRect(0,0,cvs.width,cvs.height);
-  for(var s of seeds){
-    s.tw += s.twV;
-    // ambient drift
-    s.vx += (Math.random()-.5)*0.02*devicePixelRatio;
-    s.vy += (Math.random()-.5)*0.02*devicePixelRatio;
-    // cursor attraction/repulsion within radius
-    var dx = mx-s.x, dy = my-s.y, d2 = dx*dx+dy*dy;
-    if (d2 < 240*240*devicePixelRatio*devicePixelRatio){
+  var dt = Math.min((t-last)/16.7, 3); last = t;
+  m[0] += (mT[0]-m[0]) * 0.14; m[1] += (mT[1]-m[1]) * 0.14;
+  ctx.clearRect(0,0,innerWidth,innerHeight);
+  for (var s of seeds){
+    s.tw += s.twV * dt;
+    // ambient drift: slow sine wander instead of white-noise kicks
+    s.vx += Math.sin(t*0.0004*s.wq + s.wph) * 0.006 * dt;
+    s.vy += Math.cos(t*0.00037*s.wq + s.wph) * 0.006 * dt;
+    // cursor attraction/repulsion within the radius of influence
+    var dx = m[0]-s.x, dy = m[1]-s.y, d2 = dx*dx+dy*dy;
+    if (d2 < RADIUS*RADIUS){
       var d = Math.sqrt(d2)||1;
-      var f = s.k * 0.028 * devicePixelRatio;     // attract toward cursor
-      if (d < 60*devicePixelRatio) f = -f*2.2;    // then repel: the "scat!" moment
-      s.vx += (dx/d)*f; s.vy += (dy/d)*f;
+      var f = s.k * 0.028;       // attract toward cursor
+      if (d < 46) f = -f*2.2;    // then repel: the "scat!" moment
+      s.vx += (dx/d)*f*dt; s.vy += (dy/d)*f*dt;
     }
-    s.vx *= 0.98; s.vy *= 0.98;
-    s.x += s.vx; s.y += s.vy;
-    if (s.x<0) s.x=cvs.width; if (s.x>cvs.width) s.x=0;
-    if (s.y<0) s.y=cvs.height; if (s.y>cvs.height) s.y=0;
+    s.vx *= 0.985; s.vy *= 0.985;
+    var sp = Math.sqrt(s.vx*s.vx + s.vy*s.vy), cap = 0.6;   // hard speed cap: responsive, not noisy
+    if (sp > cap){ s.vx *= cap/sp; s.vy *= cap/sp; }
+    s.x += s.vx*dt; s.y += s.vy*dt;
+    if (s.x<0) s.x=innerWidth; if (s.x>innerWidth) s.x=0;
+    if (s.y<0) s.y=innerHeight; if (s.y>innerHeight) s.y=0;
     var glow = 0.35 + 0.4*Math.abs(Math.sin(s.tw));
     ctx.beginPath();
     ctx.fillStyle = "rgba(143,176,110," + (glow*0.75) + ")";

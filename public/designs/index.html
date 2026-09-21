@@ -66,7 +66,7 @@
     <span class="tag">Concept A · 夜祷 VIGIL</span>
     <h2>搁浅之夜 · The Stranded Abbey</h2>
     <p>深夜中的修道院：WebGL 噪声花窗光在幕布上流动，光环随鼠标摇晃，花瓣在静默中飘落。主标题逐字自夜色中升起。</p>
-    <div class="tech">fbm value-noise fragment shader · canvas petals · split-char kinetic title · text-scramble · halo parallax cursor</div>
+    <div class="tech">quarter-res fbm glass + frozen reduced-motion frame · depth-band petals · scroll-lerped wind · split-char kinetic title · text-scramble · lerped halo light</div>
   </a>
 
   <a class="concept" href="concept-b-procession.html">
@@ -80,41 +80,41 @@
     <span class="tag">Concept C · 花墙 HORTUS</span>
     <h2>自由花墙 · The Living Wall</h2>
     <p>作品如花在墙：磁吸悬停令花瓣张开，花名以字符扰乱再译出真名，指尖经过处拖出一道花粉轨迹。品类筛选用花种作喻。</p>
-    <div class="tech">magnetic 3d tilt · text-scramble decode · pollen cursor trail · svg stroke draw · layout morph on filter</div>
+    <div class="tech">magnetic 3d tilt · text-scramble decode · ring-buffer pollen trail (distance-threshold spawns) · svg stroke draw · layout morph on filter</div>
   </a>
 
 </div>
 
 <h2 style="margin-top:3rem;text-align:center;color:#E0C07A;font-size:1.1rem;letter-spacing:.3em">氛围层 / AMBIENT FX</h2>
-<p class="note" style="margin:1rem 0 1.5rem">为 home 花瓣与 section 指尖轨迹的候选——打开后请移动鼠标或静待片刻。</p>
+<p class="note" style="margin:1rem 0 1.5rem">为 home 花瓣与 section 指尖轨迹的候选——已按调研规约（fx-research thread C）实现：rAF 采样、阈值生成、环形缓冲、DPR≤2、粗糙指针回退、低动态单帧。打开后移动鼠标或静待片刻。</p>
 <div class="cards">
 
   <a class="concept" href="fx-petals-breeze.html">
     <span class="tag">FX A · home 候选</span>
     <h2>风舞 · 瓣</h2>
     <p>花瓣三维翻滚 + 阵风风场：每片有自己的相位、升力曲线，不再直落。适合夜修院。</p>
-    <div class="tech">canvas tumble-ellipse physics · gust windfield · per-petal phase</div>
+    <div class="tech">2 depth bands (far=small·dim·slow) · tumble-squish ellipses · layered weather sines · dt clamp, DPR cap 2</div>
   </a>
 
   <a class="concept" href="fx-pollen-field.html">
     <span class="tag">FX B · section 候选 · 白昼</span>
     <h2>草木花粉 · 场</h2>
     <p>整屏常驻花粉缓慢漂流；指尖靠近时，花粉依次聚拢又弹开——共感的触感版。</p>
-    <div class="tech">ambient drift · cursor attract-repel · soft bloom halo</div>
+    <div class="tech">de-noised sine wander · ~150px lerped attract/repel · coarse pointers = pure ambience</div>
   </a>
 
   <a class="concept" href="fx-threads.html">
     <span class="tag">FX C · section 候选 · 夜晚</span>
     <h2>共感 · 丝线</h2>
     <p>星点是社员：指尖移近谁，谁就有金线牵向你，微弯如笔意。更贴合我们的隐喻。</p>
-    <div class="tech">plexus constellation · curved threads · neighbor web</div>
+    <div class="tech">lerped thread anchor · quadratic drawn threads · neighbor web · coarse pointers = stars only</div>
   </a>
 
   <a class="concept" href="fx-censer.html">
     <span class="tag">FX D · 仪式向</span>
     <h2>祈尘 · 上行</h2>
     <p>静止时香尘徐徐上升；指尖划过之处，尘随轨迹旋起又散。修道院长夜焚香。</p>
-    <div class="tech">lighter-blend smoke · spiral rise · cursor spawn trail</div>
+    <div class="tech">lighter-blend smoke · rAF-sampled trail spawns (9px threshold, ≤5/frame budget) · oldest-evict cap</div>
   </a>
 
 </div>
