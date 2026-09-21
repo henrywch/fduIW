@@ -3,7 +3,7 @@ import { getCollection } from "astro:content";
 import Base from "../../layouts/Base.astro";
 import Footer from "../../components/Footer.astro";
 
-const novels = new Map((await getCollection("works")).map((w) => [w.id, w]));
+const novels = new Map((await getCollection("works")).map((w) => [w.id.split("/").pop()!, w]));
 
 const EN: Record<string, { genre: string; blurb: string }> = {
   "hangzhou-twelve-hours": { genre: "Fantasy", blurb: "\"Twelve Hours of Hangzhou\" — Best Fantasy & Most Promising, 1st Fiction Festival" },
@@ -12,18 +12,15 @@ const EN: Record<string, { genre: string; blurb: string }> = {
   "silver-age": { genre: "Story / Characters", blurb: "\"The Silver Age\" — Best Story & Best Characters, 1st Fiction Festival" },
 };
 
+// web-sourced images dress headers only; the wall shows originals only
 const wall = [
   { kind: "novel", slug: "hangzhou-twelve-hours", img: "/assets/image/杭城十二时辰-窗格.jpg" },
   { kind: "novel", slug: "cyber-fortune-telling", img: "/assets/image/cyber-fortune-telling.png" },
-  { kind: "art", img: "/assets/image/trantor.jpg", alt: "Trantor vista", title: "川陀远景", meta: "trantor · editorial collection", blurb: "" },
   { kind: "novel", slug: "midnight-broadcast-notes", img: "/assets/image/midnight-broadcast.jpg" },
-  { kind: "art", img: "/assets/image/loong.jpg", alt: "Loong", title: "龙", meta: "loong · editorial collection", blurb: "" },
   { kind: "novel", slug: "silver-age", img: "/assets/image/sunset-factory.jpg" },
-  { kind: "art", img: "/assets/image/motor-couple.jpg", alt: "Motor couple", title: "机车双人", meta: "motor-couple · editorial collection", blurb: "" },
   { kind: "setting", img: "/assets/image/杭城十二时辰-封面-全.jpg", alt: "Qing-min bestiary excerpt", title: "青民谱系 · 节录",
     meta: "魔王与小玖 · worldbuilding", blurb: "The Qing-min bestiary — shares a world with \"Twelve Hours of Hangzhou\"",
     href: "/works/hangzhou-twelve-hours/" },
-  { kind: "art", img: "/assets/image/sunflower.png", alt: "Sunflower", title: "向日葵", meta: "sunflower · editorial collection", blurb: "" },
 ];
 ---
 <Base lang="en" title="The Garden · Hortus de Escapismo"
@@ -52,9 +49,9 @@ const wall = [
 
     {wall.map((item) => item.kind === "novel" ? (() => {
       const w = novels.get(item.slug)!;
-      const en = EN[w.id];
+      const en = EN[w.id.split("/").pop()!];
       return (
-        <a class="living" data-f="novel" href={`/works/${w.id}/`}>
+        <a class="living" data-f="novel" href={`/works/${w.id.split("/").pop()}/`}>
           <span class="medium-tag">文</span>
           <img src={item.img} alt={w.data.title} loading="lazy" />
           <div class="stem">

@@ -4,7 +4,7 @@ import { glob } from "astro/loaders";
 const bilingual = z.object({ zh: z.string(), en: z.string() });
 
 const works = defineCollection({
-  loader: glob({ pattern: "*.md", base: "./src/content/works" }),
+  loader: glob({ pattern: "**/*.md", base: "./src/content/works" }),
   schema: z.object({
     title: z.string(),
     subtitle: z.string().default(""),

@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const LABEL_DIR = path.join(ROOT, "assets", "label");
-const OUT_DIR = path.join(ROOT, "src", "content", "works");
+const OUT_DIR = path.join(ROOT, "src", "content", "works", "fantasy");
 
 // slug -> { label file, cover (under /assets/image/), latin tagline }
 const WORKS = [

@@ -3,22 +3,17 @@ import { getCollection } from "astro:content";
 import Base from "../layouts/Base.astro";
 import Footer from "../components/Footer.astro";
 
-const novels = new Map((await getCollection("works")).map((w) => [w.id, w]));
+const novels = new Map((await getCollection("works")).map((w) => [w.id.split("/").pop()!, w]));
 
-// one mixed wall in the original masonry order: novels from the collection,
-// editorial paintings/settings inlined
+// web-sourced images (unverifiable authority) may dress headers, never stand alone as works
 const wall = [
   { kind: "novel", slug: "hangzhou-twelve-hours", img: "/assets/image/杭城十二时辰-窗格.jpg" },
   { kind: "novel", slug: "cyber-fortune-telling", img: "/assets/image/cyber-fortune-telling.png" },
-  { kind: "art", img: "/assets/image/trantor.jpg", alt: "川陀远景", title: "川陀远景", meta: "trantor · 编辑部藏", blurb: "" },
   { kind: "novel", slug: "midnight-broadcast-notes", img: "/assets/image/midnight-broadcast.jpg" },
-  { kind: "art", img: "/assets/image/loong.jpg", alt: "龙", title: "龙", meta: "loong · 编辑部藏", blurb: "" },
   { kind: "novel", slug: "silver-age", img: "/assets/image/sunset-factory.jpg" },
-  { kind: "art", img: "/assets/image/motor-couple.jpg", alt: "机车双人", title: "机车双人", meta: "motor-couple · 编辑部藏", blurb: "" },
   { kind: "setting", img: "/assets/image/杭城十二时辰-封面-全.jpg", alt: "青民谱系 节录", title: "青民谱系 · 节录",
     meta: "魔王与小玖 · 世界观设定", blurb: "妖盟、青莲堂与杭城，设定同《杭城十二时辰》共享一界",
     href: "/works/hangzhou-twelve-hours/" },
-  { kind: "art", img: "/assets/image/sunflower.png", alt: "向日葵", title: "向日葵", meta: "sunflower · 编辑部藏", blurb: "" },
 ];
 
 const genreOf = (tags: string[]) => tags.filter((t) => ["奇幻", "科幻", "悬疑"].includes(t))[0] || "文";
@@ -50,7 +45,7 @@ const genreOf = (tags: string[]) => tags.filter((t) => ["奇幻", "科幻", "悬
     {wall.map((item) => item.kind === "novel" ? (() => {
       const w = novels.get(item.slug)!;
       return (
-        <a class="living" data-f="novel" href={`/works/${w.id}/`}>
+        <a class="living" data-f="novel" href={`/works/${w.id.split("/").pop()}/`}>
           <span class="medium-tag">文</span>
           <img src={item.img} alt={w.data.title + " 封面"} loading="lazy" />
           <div class="stem">

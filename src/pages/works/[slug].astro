@@ -4,7 +4,8 @@ import Base from "../../layouts/Base.astro";
 
 export async function getStaticPaths() {
   const works = await getCollection("works");
-  return works.map((w) => ({ params: { slug: w.id }, props: { work: w } }));
+  // ids carry the category subdir ("fantasy/slug"); serve at /works/<slug>/
+  return works.map((w) => ({ params: { slug: w.id.split("/").pop()! }, props: { work: w } }));
 }
 
 const { work } = Astro.props;
