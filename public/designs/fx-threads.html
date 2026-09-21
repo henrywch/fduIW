@@ -12,7 +12,7 @@
   p{color:#9A927E;font-size:.9rem;margin-top:.9rem;line-height:1.9}
   .latin{font-family:"Cormorant Garamond",serif;letter-spacing:.35em;color:#E0C07A;font-size:.85rem;margin-top:.4rem}
   a.back{position:fixed;top:1.4rem;left:1.6rem;color:#E0C07A;font-family:monospace;font-size:.72rem;letter-spacing:.2em;text-decoration:none;z-index:5}
-  canvas{position:fixed;inset:0;z-index:0}
+  canvas{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
   main{position:relative;z-index:2;pointer-events:none}
   .stars span{position:fixed;background:#E8E2D4;border-radius:50%;opacity:.55;animation:tw 3s ease-in-out infinite}
   @keyframes tw{50%{opacity:.12}}
@@ -26,12 +26,12 @@
 <main>
   <h1>共感 · 丝线</h1>
   <div class="latin">FX C · EMPATHY THREADS</div>
-  <p>星辰是花圃中的社员——指尖所向，金线牵去；线端追的是 lerp 平滑后的落点，微弯如笔意。<br>研究出处：「共感」律法意象 + plexus/constellation web 经典星线结构；粗糙指针下仅余星光闪烁。</p>
+  <p>星辰是花圃中的社员——指尖所向，金线即时牵去，线端只留一线 lerp 余韵，微弯如笔意。<br>研究出处：「共感」律法意象 + plexus/constellation web 经典星线结构；粗糙指针下仅余星光闪烁。</p>
 </main>
 <script>
 var cvs=document.getElementById("c"), ctx=cvs.getContext("2d");
 var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-var coarse = matchMedia("(pointer: coarse)").matches;
+var finePtr = matchMedia("(pointer: fine)").matches || matchMedia("(any-pointer: fine)").matches;
 var DPR = Math.min(devicePixelRatio||1, 2);
 function size(){cvs.width=innerWidth*DPR;cvs.height=innerHeight*DPR;ctx.setTransform(DPR,0,0,DPR,0,0)}
 size(); addEventListener("resize", size);
@@ -60,15 +60,16 @@ addEventListener("resize",function(){
   });
 });
 
-// threads aim at a lerped anchor, not the raw event stream — attached, not twitchy
+// threads follow the cursor essentially directly — a light 0.5 lerp keeps the
+// tip from stair-stepping without ever lagging a gesture behind
 var mT=[-1e4,-1e4], m=[-1e4,-1e4];
-if (!coarse){
+if (finePtr){
   addEventListener("pointermove",function(e){mT[0]=e.clientX;mT[1]=e.clientY;},{passive:true});
   addEventListener("pointerleave",function(){mT[0]=mT[1]=-1e4;});
 }
 
 function frame(t){
-  m[0]+=(mT[0]-m[0])*0.14; m[1]+=(mT[1]-m[1])*0.14;
+  m[0]+=(mT[0]-m[0])*0.5; m[1]+=(mT[1]-m[1])*0.5;
   ctx.clearRect(0,0,innerWidth,innerHeight);
   for(var n of nodes){
     // star twinkle halo

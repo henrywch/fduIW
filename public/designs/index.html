@@ -66,7 +66,7 @@
     <span class="tag">Concept A · 夜祷 VIGIL</span>
     <h2>搁浅之夜 · The Stranded Abbey</h2>
     <p>深夜中的修道院：WebGL 噪声花窗光在幕布上流动，光环随鼠标摇晃，花瓣在静默中飘落。主标题逐字自夜色中升起。</p>
-    <div class="tech">quarter-res fbm glass + frozen reduced-motion frame · depth-band petals · scroll-lerped wind · split-char kinetic title · text-scramble · lerped halo light</div>
+    <div class="tech">quarter-res domain-warped fbm mist + frozen reduced-motion frame · sakura-petal bands · scroll-lerped wind · split-char kinetic title · text-scramble · lerped halo light</div>
   </a>
 
   <a class="concept" href="concept-b-procession.html">
@@ -80,7 +80,7 @@
     <span class="tag">Concept C · 花墙 HORTUS</span>
     <h2>自由花墙 · The Living Wall</h2>
     <p>作品如花在墙：磁吸悬停令花瓣张开，花名以字符扰乱再译出真名，指尖经过处拖出一道花粉轨迹。品类筛选用花种作喻。</p>
-    <div class="tech">magnetic 3d tilt · text-scramble decode · ring-buffer pollen trail (distance-threshold spawns) · svg stroke draw · layout morph on filter</div>
+    <div class="tech">magnetic 3d tilt · text-scramble decode · kirakira spark trail (baked tapered-ray sprites, grow-shrink glints) · svg stroke draw · layout morph on filter</div>
   </a>
 
 </div>
@@ -93,7 +93,7 @@
     <span class="tag">FX A · home 候选</span>
     <h2>风舞 · 瓣</h2>
     <p>花瓣三维翻滚 + 阵风风场：每片有自己的相位、升力曲线，不再直落。适合夜修院。</p>
-    <div class="tech">2 depth bands (far=small·dim·slow) · tumble-squish ellipses · layered weather sines · dt clamp, DPR cap 2</div>
+    <div class="tech">notched sakura-petal beziers · 2 depth bands · layered weather sines · tumble-squish · dt clamp, DPR cap 2</div>
   </a>
 
   <a class="concept" href="fx-pollen-field.html">
@@ -107,14 +107,14 @@
     <span class="tag">FX C · section 候选 · 夜晚</span>
     <h2>共感 · 丝线</h2>
     <p>星点是社员：指尖移近谁，谁就有金线牵向你，微弯如笔意。更贴合我们的隐喻。</p>
-    <div class="tech">lerped thread anchor · quadratic drawn threads · neighbor web · coarse pointers = stars only</div>
+    <div class="tech">fast-lerp thread tip · quadratic drawn threads · neighbor web · coarse pointers = stars only</div>
   </a>
 
   <a class="concept" href="fx-censer.html">
     <span class="tag">FX D · 仪式向</span>
     <h2>祈尘 · 上行</h2>
     <p>静止时香尘徐徐上升；指尖划过之处，尘随轨迹旋起又散。修道院长夜焚香。</p>
-    <div class="tech">lighter-blend smoke · rAF-sampled trail spawns (9px threshold, ≤5/frame budget) · oldest-evict cap</div>
+    <div class="tech">incense trail — sprite puffs that grow &amp; cool · kirakira spark embers · brief buoyancy → curl turbulence · 3 wisp streams · idle = thin filament</div>
   </a>
 
 </div>

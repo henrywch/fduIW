@@ -10,7 +10,7 @@
   html { scroll-behavior: smooth; }
   body { background: #161A26; color: #E8E2D4; font-family: "Noto Serif SC", serif; overflow-x: hidden; }
   #gl { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; }
-  #petals { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+  #petals { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
   .vig { position: fixed; inset: 0; z-index: 2; pointer-events: none;
     background: radial-gradient(ellipse 90% 70% at 50% 45%, transparent 45%, rgba(10,12,20,.75) 100%); }
 
@@ -120,21 +120,22 @@
       "void main(){",
       " vec2 uv=gl_FragCoord.xy/r; vec2 q=uv*vec2(r.x/r.y,1.);",
       " vec2 drift=vec2(t*.02,-t*.008);",
-      " float n=fbm(q*2.2+drift+fbm(q*3.5-drift*1.6)*.9);",
-      // stained-glass panes: quantise softly + lead lines
-      " float panes=abs(fract(n*7.)-.5)*2.;",
-      " float lead=smoothstep(.90,1.,panes);",
-      // palette: nave indigo -> emerald -> gold
+      // domain-warped fbm — continuous drifting mist, no cellular quantisation
+      " float n=fbm(q*1.7+drift+fbm(q*2.4-drift*1.5)*.9);",
+      // stained-glass hint: gossamer seams only (soft 30% dim), never hard lead lines
+      " float bord=abs(fract(n*3.)-.5)*2.;",
+      " float pane=1.-.30*smoothstep(.72,.97,bord);",
+      // palette: nave indigo -> emerald -> candle gold
       " vec3 indigo=vec3(.086,.102,.149),green=vec3(.30,.44,.32),gold=vec3(.88,.76,.48);",
-      " vec3 col=mix(indigo,green,smoothstep(.25,.65,n));",
-      " col=mix(col,gold,smoothstep(.62,.85,n));",
-      // halo light follows mouse
+      " vec3 col=mix(indigo,green,smoothstep(.2,.72,n));",
+      " col=mix(col,gold,smoothstep(.66,.95,n));",
+      " col*=pane;",
+      // candle-glow halo that follows the cursor
       " float d=distance(uv,m);",
-      " col+=gold*exp(-d*6.5)*.35;",
-      " lead*=.65; col=mix(col,vec3(.04,.045,.07),lead);",
-      // vignette + grain
+      " col+=gold*exp(-d*6.5)*.38;",
+      // vignette + fine grain (grain kills banding at quarter-res)
       " col*=1.-.35*distance(uv,vec2(.5));",
-      " col+= (hash(gl_FragCoord.xy+t)-.5)*.03;",
+      " col+= (hash(gl_FragCoord.xy+t)-.5)*.02;",
       " gl_FragColor=vec4(col,1.);}"
     ].join("\n");
     function sh(type, src) { var s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; }
@@ -246,10 +247,10 @@
     px.setTransform(pDpr, 0, 0, pDpr, 0, 0);
   }
   sizeP(); addEventListener("resize", sizeP);
-  // gold-heavy, vellum next, leaf rare — the vigil palette
+  // gold-dominant with pale blush and a rare madder — petals, never leaves
   function pcol() {
     var k = Math.random();
-    return k < 0.55 ? "rgba(224,192,122," : k < 0.85 ? "rgba(235,226,205," : "rgba(160,184,145,";
+    return k < 0.6 ? "rgba(224,192,122," : k < 0.85 ? "rgba(242,226,216," : "rgba(205,122,100,";
   }
   function spawnPetal(init, far) {
     var r = far ? 1.3 + Math.random() * 1.6 : 2.6 + Math.random() * 3.1;
@@ -286,9 +287,23 @@
         p.rot += (p.vr + Math.sin(t * p.wq + p.wph) * 0.006) * dt;   // slow secondary wobble
         if (p.y > innerHeight + 24) { P[i] = spawnPetal(false, p.far); return; }
         if (x < -60) p.driftX += innerWidth + 120; else if (x > innerWidth + 60) p.driftX -= innerWidth + 120;
+        // sakura-petal silhouette: rounded lobes, small notch at the tip;
+        // a slow tumble-squish narrows the blade as it turns edge-on
+        var sq = 0.5 + 0.5 * Math.abs(Math.cos(t * 0.6 * p.wq + p.wph));
+        var w = p.r * 0.85 * sq, nd = p.r * 0.16;
         px.save(); px.translate(x, p.y); px.rotate(p.rot);
+        px.globalAlpha = 0.6 + 0.4 * sq;            // edge-on petals dim
         px.fillStyle = p.col + p.a + ")";
-        px.beginPath(); px.ellipse(0, 0, p.r * 2, p.r, 0, 0, Math.PI * 2); px.fill();
+        px.beginPath();
+        px.moveTo(0, -p.r + nd);
+        px.bezierCurveTo(w * 0.65, -p.r * 1.08, w * 1.25, -p.r * 0.3, w * 0.8, p.r * 0.28);
+        px.bezierCurveTo(w * 0.55, p.r * 0.72, w * 0.2, p.r * 0.95, 0, p.r);
+        px.bezierCurveTo(-w * 0.2, p.r * 0.95, -w * 0.55, p.r * 0.72, -w * 0.8, p.r * 0.28);
+        px.bezierCurveTo(-w * 1.25, -p.r * 0.3, -w * 0.65, -p.r * 1.08, 0, -p.r + nd);
+        px.fill();
+        // soft center vein
+        px.globalAlpha *= 0.35; px.strokeStyle = "rgba(122,88,52,1)"; px.lineWidth = 0.6;
+        px.beginPath(); px.moveTo(0, p.r * 0.85); px.quadraticCurveTo(w * 0.1, p.r * 0.1, 0, -p.r * 0.55); px.stroke();
         px.restore();
       });
       requestAnimationFrame(petalFrame);
