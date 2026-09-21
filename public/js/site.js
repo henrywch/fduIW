@@ -275,22 +275,22 @@
       return k < 0.6 ? "rgba(224,192,122," : k < 0.85 ? "rgba(242,226,216," : "rgba(205,122,100,";
     }
     function spawnPetal(init, far) {
-      var r = far ? 1.3 + Math.random() * 1.6 : 2.6 + Math.random() * 3.1;
+      var r = far ? 1.8 + Math.random() * 1.8 : 3.4 + Math.random() * 3.8;
       return {
         far: far,
         baseX: Math.random() * innerWidth, driftX: 0,
         y: init ? Math.random() * innerHeight : -24,
         r: r,
-        vy: (far ? 0.22 : 0.4) + Math.random() * 0.25 + r * 0.09,  // fall speed tied to size
-        amp: far ? 12 + Math.random() * 12 : 24 + Math.random() * 16,
+        vy: (far ? 0.24 : 0.45) + Math.random() * 0.3 + r * 0.09,  // fall speed tied to size
+        amp: far ? 14 + Math.random() * 14 : 26 + Math.random() * 18,
         fq: 0.35 + Math.random() * 0.5, ph: Math.random() * 6.2832,
         rot: Math.random() * 6.2832, vr: (Math.random() - 0.5) * 0.02,
         wq: 0.5 + Math.random() * 0.7, wph: Math.random() * 6.2832,
         col: pcol(),
-        a: far ? 0.1 + Math.random() * 0.12 : 0.22 + Math.random() * 0.18
+        a: far ? 0.16 + Math.random() * 0.14 : 0.32 + Math.random() * 0.18
       };
     }
-    var N_NEAR = reduced ? 0 : (innerWidth < 720 ? 4 : 9), N_FAR = reduced ? 0 : (innerWidth < 720 ? 8 : 15);
+    var N_NEAR = reduced ? 0 : (innerWidth < 720 ? 6 : 14), N_FAR = reduced ? 0 : (innerWidth < 720 ? 12 : 22);
     for (var i = 0; i < N_NEAR + N_FAR; i++) P.push(spawnPetal(true, i >= N_NEAR));
     if (P.length) {
       var lastT = performance.now(), gust = 0, lastScr = window.scrollY;
