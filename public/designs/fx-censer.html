@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FX D · 祈尘 Censer Dust (cursor)</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0}
+  body{background:#161A26;color:#E8E2D4;font-family:"Noto Serif SC",serif;overflow:hidden;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  h1{font-weight:600;letter-spacing:.25em;font-size:clamp(1.4rem,4vw,2.2rem)}
+  p{color:#9A927E;font-size:.9rem;margin-top:.9rem;line-height:1.9}
+  .latin{font-family:"Cormorant Garamond",serif;letter-spacing:.35em;color:#E0C07A;font-size:.85rem;margin-top:.4rem}
+  a.back{position:fixed;top:1.4rem;left:1.6rem;color:#E0C07A;font-family:monospace;font-size:.72rem;letter-spacing:.2em;text-decoration:none;z-index:5}
+  canvas{position:fixed;inset:0;z-index:0}
+  main{position:relative;z-index:2;pointer-events:none}
+</style>
+</head>
+<body>
+<a class="back" href="index.html">← LAB</a>
+<canvas id="c"></canvas>
+<main>
+  <h1>祈尘 · 上行</h1>
+  <div class="latin">FX D · CENSER DUST · STILL RISE, CURSOR DRAWS</div>
+  <p>静止时香尘自然上升；指尖划过之处，香尘随轨迹旋起又散去。<br>研究出处：gooey/liquid cursor 轨迹、烟雾上升模型。</p>
+</main>
+<script>
+var cvs=document.getElementById("c"), ctx=cvs.getContext("2d");
+ctx.globalCompositeOperation="lighter";  // dark bg: particles add light
+var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+function size(){cvs.width=innerWidth*devicePixelRatio;cvs.height=innerHeight*devicePixelRatio}
+size(); addEventListener("resize", size);
+
+var parts=[];
+function seed(x,y,ambient){
+  parts.push({
+    x:x,y:y,
+    vx:(Math.random()-.5)*0.35*devicePixelRatio,
+    vy:(-0.5-Math.random()*0.7)*devicePixelRatio,
+    r:(1.8+Math.random()*3.2)*devicePixelRatio,
+    life:1, decay: ambient ? 0.0012+Math.random()*0.002 : 0.009+Math.random()*0.009,
+    warm: Math.random()<0.7
+  });
+}
+var mx=-99,my=-99,px=-99,py=-99;
+addEventListener("pointermove",function(e){
+  var nx=e.clientX*devicePixelRatio, ny=e.clientY*devicePixelRatio;
+  if(px>-99 && parts.length<220){
+    var ddx=nx-px, ddy=ny-py, dd=Math.sqrt(ddx*ddx+ddy*ddy);
+    var steps=Math.min(6, Math.floor(dd/(8*devicePixelRatio)));
+    for(var i=0;i<steps;i++){
+      var k=i/(steps||1);
+      seed(px+ddx*k + (Math.random()-.5)*8, py+ddy*k + (Math.random()-.5)*8, false);
+    }
+  }
+  px=nx; py=ny;
+});
+addEventListener("pointerleave",function(){px=py=-99});
+
+function frame(t){
+  ctx.clearRect(0,0,cvs.width,cvs.height);
+  // slow ambient spawn: always something rising — denser base rain now
+  if (!reduced && Math.random() < 0.55 && parts.length < 320) {
+    seed(Math.random()*cvs.width, cvs.height + 10, true);
+  }
+  for (var i=parts.length-1;i>=0;i--){
+    var p=parts[i];
+    // gentle spiraling while rising
+    p.x += p.vx + Math.sin(t*0.001 + p.y*0.01)*0.3*devicePixelRatio;
+    p.y += p.vy;
+    p.life -= p.decay;
+    if (p.life<=0 || p.y < -20){ parts.splice(i,1); continue; }
+    var a = p.life * (p.warm?0.65:0.5);
+    var c = p.warm ? "224,192,122" : "143,176,137";
+    ctx.beginPath(); ctx.fillStyle="rgba("+c+","+a+")";
+    ctx.arc(p.x, p.y, p.r*p.life + 1, 0, Math.PI*2); ctx.fill();
+  }
+  if (!reduced) requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+// one frame so reduced-motion gets a static dusting
+for (var j=0;j<40;j++) frame(0);
+</script>
+</body>
+</html>

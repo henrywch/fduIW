@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FX A · 风舞花瓣 Breeze Petals</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0}
+  body{background:#161A26;color:#E8E2D4;font-family:"Noto Serif SC",serif;overflow:hidden;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  h1{font-weight:600;letter-spacing:.25em;font-size:clamp(1.4rem,4vw,2.2rem)}
+  p{color:#9A927E;font-size:.9rem;margin-top:.9rem;letter-spacing:.06em;line-height:1.9}
+  .latin{font-family:"Cormorant Garamond",serif;letter-spacing:.35em;color:#E0C07A;font-size:.85rem;margin-top:.4rem}
+  a.back{position:fixed;top:1.4rem;left:1.6rem;color:#E0C07A;font-family:monospace;font-size:.72rem;letter-spacing:.2em;text-decoration:none;z-index:5}
+  canvas{position:fixed;inset:0;z-index:0}
+  main{position:relative;z-index:2}
+</style>
+</head>
+<body>
+<a class="back" href="index.html">← LAB</a>
+<canvas id="c"></canvas>
+<main>
+  <h1>风舞 · 瓣</h1>
+  <div class="latin">FX A · BREEZE PETALS</div>
+  <p>三维翻滚 + 风的阵风层：每片花瓣有自己的相位与升力。<br>研究出处：sakura.js 摆动类目、CodePen 风场粒子、Godot 风驱花瓣。</p>
+</main>
+<script>
+var cvs = document.getElementById("c"), ctx = cvs.getContext("2d");
+var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+function size(){ cvs.width = innerWidth * devicePixelRatio; cvs.height = innerHeight * devicePixelRatio; }
+size(); addEventListener("resize", size);
+
+var N = 26, petals = [];
+function spawn(init){
+  return {
+    x: Math.random()*cvs.width,
+    y: init ? Math.random()*cvs.height : -30*devicePixelRatio,
+    r: (3.5 + Math.random()*4.5) * devicePixelRatio,   // petal radius
+    vy: (0.35 + Math.random()*0.65) * devicePixelRatio,  // fall speed
+    phase: Math.random()*Math.PI*2,        // sway phase
+    phaseV: 0.008 + Math.random()*0.012,   // sway frequency
+    tumble: Math.random()*Math.PI*2,       // 3d tumble angle
+    tumbleV: (Math.random()-.5)*0.05,      // tumble rate
+    hue: Math.random(),
+  };
+}
+for (var i=0;i<N;i++) petals.push(spawn(true));
+
+// gusty wind: two sines + a third slow one, gives breathing rather than a fixed breeze
+function wind(t, y){
+  return Math.sin(t*0.0007 + y*0.002) * 0.45
+       + Math.sin(t*0.00018 + 2.0) * 0.6
+       + Math.sin(t*0.0031) * 0.08;
+}
+
+function frame(t){
+  ctx.clearRect(0,0,cvs.width,cvs.height);
+  for (var p of petals){
+    p.phase += p.phaseV;
+    p.tumble += p.tumbleV;
+    var w = wind(t, p.y) * devicePixelRatio;
+    p.x += w + Math.sin(p.phase)*0.4*devicePixelRatio;
+    p.y += p.vy * (0.85 + Math.sin(p.phase*0.7)*0.3) ;
+    if (p.y > cvs.height + 40) { Object.assign(p, spawn(false)); continue; }
+    if (p.x < -60) p.x = cvs.width + 50;
+    if (p.x > cvs.width + 60) p.x = -50;
+
+    // petal: stretched ellipse, tumbling around vertical axis (rotateY feel via width squish)
+    var squish = Math.cos(p.tumble);             // 1..-1
+    var rot = Math.sin(p.phase) * 0.6;
+    var alpha = 0.25 + 0.45*Math.abs(squish);    // edge-on petals fade
+    var r = p.hue < 0.55 ? "224,192,122" : (p.hue < 0.85 ? "143,176,137" : "205,122,100");
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(rot);
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = "rgba(" + r + ",1)";
+    ctx.beginPath();
+    ctx.ellipse(0, 0, Math.max(0.6, p.r*1.9*Math.abs(squish)), p.r, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+  if (!reduced) requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FX C · 共感丝线 Empathy Threads (cursor)</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0}
+  body{background:#191D2A;color:#E8E2D4;font-family:"Noto Serif SC",serif;overflow:hidden;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  h1{font-weight:600;letter-spacing:.25em;font-size:clamp(1.4rem,4vw,2.2rem)}
+  p{color:#9A927E;font-size:.9rem;margin-top:.9rem;line-height:1.9}
+  .latin{font-family:"Cormorant Garamond",serif;letter-spacing:.35em;color:#E0C07A;font-size:.85rem;margin-top:.4rem}
+  a.back{position:fixed;top:1.4rem;left:1.6rem;color:#E0C07A;font-family:monospace;font-size:.72rem;letter-spacing:.2em;text-decoration:none;z-index:5}
+  canvas{position:fixed;inset:0;z-index:0}
+  main{position:relative;z-index:2;pointer-events:none}
+  .stars span{position:fixed;background:#E8E2D4;border-radius:50%;opacity:.55;animation:tw 3s ease-in-out infinite}
+  @keyframes tw{50%{opacity:.12}}
+</style>
+</head>
+<body>
+<a class="back" href="index.html">← LAB</a>
+<div class="stars" id="stars"></div>
+<canvas id="c"></canvas>
+<main>
+  <h1>共感 · 丝线</h1>
+  <div class="latin">FX C · EMPATHY THREADS</div>
+  <p>星辰是花圃中的社员——你移动指尖，线就牵向哪个方向。<br>研究出处：「共感」律法意象 + plexus/constellation web 经典星线结构。</p>
+</main>
+<script>
+var cvs=document.getElementById("c"), ctx=cvs.getContext("2d");
+var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+function size(){cvs.width=innerWidth*devicePixelRatio;cvs.height=innerHeight*devicePixelRatio}
+size(); addEventListener("resize", size);
+
+// fixed "stars" — the friars
+var N=26, nodes=[];
+var starLayer = document.getElementById("stars");
+for (var i=0;i<N;i++){
+  nodes.push({
+    x: Math.random()*cvs.width, y: Math.random()*cvs.height,
+    r:(1.2+Math.random()*1.8)*devicePixelRatio,
+    tw: Math.random()*Math.PI*2
+  });
+  var dot=document.createElement("span");
+  var sz=(2+Math.random()*2);
+  dot.style.cssText="width:"+sz+"px;height:"+sz+"px;left:"+(nodes[i].x/devicePixelRatio)+"px;top:"+(nodes[i].y/devicePixelRatio)+"px;animation-delay:"+(Math.random()*3)+"s";
+  starLayer.appendChild(dot);
+}
+addEventListener("resize",function(){
+  starLayer.innerHTML="";
+  nodes.forEach(function(n){
+    n.x=Math.random()*cvs.width; n.y=Math.random()*cvs.height;
+    var dot=document.createElement("span"); var sz=2+Math.random()*2;
+    dot.style.cssText="width:"+sz+"px;height:"+sz+"px;left:"+(n.x/devicePixelRatio)+"px;top:"+(n.y/devicePixelRatio)+"px;animation-delay:"+(Math.random()*3)+"s";
+    starLayer.appendChild(dot);
+  });
+});
+
+var mx=-9999,my=-9999;
+addEventListener("pointermove",function(e){mx=e.clientX*devicePixelRatio;my=e.clientY*devicePixelRatio;});
+addEventListener("pointerleave",function(){mx=my=-9999;});
+
+function frame(t){
+  ctx.clearRect(0,0,cvs.width,cvs.height);
+  for(var n of nodes){
+    // star twinkle halo
+    var a = 0.18 + 0.14*Math.sin(t*0.002 + n.tw);
+    ctx.beginPath(); ctx.fillStyle="rgba(224,192,122,"+a+")";
+    ctx.arc(n.x,n.y,n.r*3,0,Math.PI*2); ctx.fill();
+    // thread to cursor when close
+    var dx=mx-n.x, dy=my-n.y, d=Math.sqrt(dx*dx+dy*dy);
+    var R = 300*devicePixelRatio;
+    if (d < R){
+      ctx.beginPath();
+      ctx.strokeStyle="rgba(224,192,122,"+(0.5*(1-d/R))+")";
+      ctx.lineWidth=(0.7)*devicePixelRatio;
+      ctx.moveTo(n.x,n.y);
+      // slight curve toward cursor for the "drawn thread" feel
+      var cx=(n.x+mx)/2 + dy*0.08, cy=(n.y+my)/2 - dx*0.08;
+      ctx.quadraticCurveTo(cx,cy,mx,my); ctx.stroke();
+    }
+    // node-node neighbors: faint permanent web
+    for (var o of nodes){ if (o===n) continue;
+      var ddx=o.x-n.x, ddy=o.y-n.y, dd=Math.sqrt(ddx*ddx+ddy*ddy), RR=140*devicePixelRatio;
+      if (dd<RR && n.x<o.x){
+        ctx.beginPath();
+        ctx.strokeStyle="rgba(143,176,137,"+(0.10*(1-dd/RR))+")";
+        ctx.lineWidth=0.6*devicePixelRatio;
+        ctx.moveTo(n.x,n.y); ctx.lineTo(o.x,o.y); ctx.stroke();
+      }
+    }
+  }
+  if (!reduced) requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
