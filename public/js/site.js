@@ -259,36 +259,79 @@
       requestAnimationFrame(pump);
     })();
 
-    /* ---------- petals over the vigil ---------- */
-    var px = petalC.getContext("2d"), P = [], N = reduced ? 0 : 18;
-    function sizeP() { petalC.width = innerWidth; petalC.height = innerHeight; }
+    /* ---------- petals over the vigil ----------
+       sakura-petal silhouettes (notched tip, rounded lobes) in gold / blush /
+       madder; two depth bands (far = small·dim·slow); shared low-frequency
+       weather sine + scroll-velocity gusts lerped back to calm */
+    var px = petalC.getContext("2d"), P = [];
+    var pDpr = Math.min(devicePixelRatio || 1, 2);
+    function sizeP() {
+      petalC.width = Math.round(innerWidth * pDpr); petalC.height = Math.round(innerHeight * pDpr);
+      px.setTransform(pDpr, 0, 0, pDpr, 0, 0);
+    }
     sizeP(); addEventListener("resize", sizeP);
-    function spawn(init) {
+    function pcol() {
+      var k = Math.random();
+      return k < 0.6 ? "rgba(224,192,122," : k < 0.85 ? "rgba(242,226,216," : "rgba(205,122,100,";
+    }
+    function spawnPetal(init, far) {
+      var r = far ? 1.3 + Math.random() * 1.6 : 2.6 + Math.random() * 3.1;
       return {
-        x: Math.random() * innerWidth, y: init ? Math.random() * innerHeight : -20,
-        r: 2.5 + Math.random() * 4, vy: 0.35 + Math.random() * 0.8,
-        vx: (Math.random() - 0.5) * 0.4,
-        rot: Math.random() * Math.PI * 2, vr: (Math.random() - 0.5) * 0.02,
-        sway: Math.random() * Math.PI * 2,
-        col: ["rgba(224,192,122,", "rgba(143,176,137,", "rgba(205,122,100,"][(Math.random() * 3) | 0],
-        a: 0.18 + Math.random() * 0.3
+        far: far,
+        baseX: Math.random() * innerWidth, driftX: 0,
+        y: init ? Math.random() * innerHeight : -24,
+        r: r,
+        vy: (far ? 0.22 : 0.4) + Math.random() * 0.25 + r * 0.09,  // fall speed tied to size
+        amp: far ? 12 + Math.random() * 12 : 24 + Math.random() * 16,
+        fq: 0.35 + Math.random() * 0.5, ph: Math.random() * 6.2832,
+        rot: Math.random() * 6.2832, vr: (Math.random() - 0.5) * 0.02,
+        wq: 0.5 + Math.random() * 0.7, wph: Math.random() * 6.2832,
+        col: pcol(),
+        a: far ? 0.1 + Math.random() * 0.12 : 0.22 + Math.random() * 0.18
       };
     }
-    for (var i = 0; i < N; i++) P.push(spawn(true));
-    (function petalFrame() {
-      if (petalC.style.opacity !== "0") {
-        px.clearRect(0, 0, petalC.width, petalC.height);
-        P.forEach(function (p, i) {
-          p.sway += 0.008; p.x += p.vx + Math.sin(p.sway) * 0.5; p.y += p.vy; p.rot += p.vr;
-          if (p.y > innerHeight + 24) P[i] = spawn(false);
-          px.save(); px.translate(p.x, p.y); px.rotate(p.rot);
-          px.fillStyle = p.col + p.a + ")";
-          px.beginPath(); px.ellipse(0, 0, p.r * 2, p.r, 0, 0, Math.PI * 2); px.fill();
-          px.restore();
-        });
-      }
-      requestAnimationFrame(petalFrame);
-    })();
+    var N_NEAR = reduced ? 0 : (innerWidth < 720 ? 4 : 9), N_FAR = reduced ? 0 : (innerWidth < 720 ? 8 : 15);
+    for (var i = 0; i < N_NEAR + N_FAR; i++) P.push(spawnPetal(true, i >= N_NEAR));
+    if (P.length) {
+      var lastT = performance.now(), gust = 0, lastScr = window.scrollY;
+      (function petalFrame(now) {
+        now = now || performance.now();
+        if (petalC.style.opacity !== "0") {
+          var dt = Math.min((now - lastT) / 16.7, 3);      // clamp: no lurch after a background tab
+          gust += (Math.max(-2.2, Math.min(2.2, (window.scrollY - lastScr) * 0.028)) - gust) * 0.06 * dt;
+          var weather = Math.sin(now / 1000 * 0.22) * 0.22, t = now / 1000;
+          px.clearRect(0, 0, innerWidth, innerHeight);
+          P.forEach(function (p, i) {
+            p.y += p.vy * dt;
+            p.driftX += (weather + gust) * (p.far ? 0.35 : 1) * dt;
+            var x = p.baseX + Math.sin(t * p.fq + p.ph) * p.amp + p.driftX;
+            p.rot += (p.vr + Math.sin(t * p.wq + p.wph) * 0.006) * dt;   // slow secondary wobble
+            if (p.y > innerHeight + 24) { P[i] = spawnPetal(false, p.far); return; }
+            if (x < -60) p.driftX += innerWidth + 120; else if (x > innerWidth + 60) p.driftX -= innerWidth + 120;
+            // sakura petal: notched tip, rounded lobes, tumble-squish blade, faint vein
+            var sq = 0.5 + 0.5 * Math.abs(Math.cos(t * 0.6 * p.wq + p.wph));
+            var w = p.r * 0.85 * sq, nd = p.r * 0.16;
+            px.save(); px.translate(x, p.y); px.rotate(p.rot);
+            px.globalAlpha = 0.6 + 0.4 * sq;
+            px.fillStyle = p.col + p.a + ")";
+            px.beginPath();
+            px.moveTo(0, -p.r + nd);
+            px.bezierCurveTo(w * 0.65, -p.r * 1.08, w * 1.25, -p.r * 0.3, w * 0.8, p.r * 0.28);
+            px.bezierCurveTo(w * 0.55, p.r * 0.72, w * 0.2, p.r * 0.95, 0, p.r);
+            px.bezierCurveTo(-w * 0.2, p.r * 0.95, -w * 0.55, p.r * 0.72, -w * 0.8, p.r * 0.28);
+            px.bezierCurveTo(-w * 1.25, -p.r * 0.3, -w * 0.65, -p.r * 1.08, 0, -p.r + nd);
+            px.fill();
+            px.globalAlpha = (0.6 + 0.4 * sq) * 0.35;
+            px.strokeStyle = "rgba(122,88,52,1)"; px.lineWidth = 0.6;
+            px.beginPath(); px.moveTo(0, p.r * 0.85); px.quadraticCurveTo(w * 0.1, p.r * 0.1, 0, -p.r * 0.55); px.stroke();
+            px.restore();
+          });
+        }
+        lastT = now;
+        lastScr = window.scrollY;
+        requestAnimationFrame(petalFrame);
+      })(performance.now());
+    }
   } // end vigil
 
   /* ============ kinetic split title ============ */
@@ -331,34 +374,101 @@
     }, 6000);
   }
 
-  /* ============ pollen cursor trail (living wall pages) ============ */
+  /* ============ golden-spark cursor trail (living wall pages) ============
+     baked kirakira sprites (tapered concave rays + hot core, per the lab
+     research), stroke-exact spawns every ~7px of movement inside the rAF loop,
+     fixed 80-slot ring buffer; fine pointers only, native cursor untouched */
   var pollen = document.getElementById("pollen");
-  if (pollen && !reduced) {
-    var c2 = pollen.getContext("2d"), parts = [];
-    function sizeC() { pollen.width = innerWidth; pollen.height = innerHeight; }
+  if (pollen && !reduced && (matchMedia("(pointer: fine)").matches || matchMedia("(any-pointer: fine)").matches)) {
+    var c2 = pollen.getContext("2d");
+    var cDpr = Math.min(devicePixelRatio || 1, 2);
+    function sizeC() {
+      pollen.width = Math.round(innerWidth * cDpr); pollen.height = Math.round(innerHeight * cDpr);
+      c2.setTransform(cDpr, 0, 0, cDpr, 0, 0);
+      c2.globalCompositeOperation = "lighter";   // sparks add light over the dark garden
+    }
     sizeC(); addEventListener("resize", sizeC);
-    addEventListener("pointermove", function (e) {
-      if (parts.length < 120) {
-        parts.push({
-          x: e.clientX, y: e.clientY,
-          vx: (Math.random() - 0.5) * 1.2, vy: (Math.random() - 0.5) * 1.2 - 0.4,
-          life: 1, r: 1 + Math.random() * 2.2,
-          col: ["224,192,122", "143,176,137", "205,122,100"][(Math.random() * 3) | 0]
-        });
+    var SPK = (function () {
+      var variants = [{ R: 22, h: 0.5 }, { R: 22, h: 0.7 }, { R: 15, h: 0.55 }, { R: 15, h: 0.68 }];
+      return variants.map(function (v) {
+        var s = document.createElement("canvas"); s.width = s.height = 48;
+        var g = s.getContext("2d"), cx = 24, cy = 24, k = 0.18 * v.R;
+        var bg = g.createRadialGradient(cx, cy, 0, cx, cy, 24);
+        bg.addColorStop(0, "rgba(235,205,150,0.22)"); bg.addColorStop(1, "rgba(235,205,150,0)");
+        g.fillStyle = bg; g.fillRect(0, 0, 48, 48);
+        g.fillStyle = "rgba(255,230,180,0.9)";
+        g.beginPath();
+        g.moveTo(cx, cy - v.R);
+        g.quadraticCurveTo(cx + k, cy - k, cx + v.R * v.h, cy);
+        g.quadraticCurveTo(cx + k, cy + k, cx, cy + v.R * 0.8);
+        g.quadraticCurveTo(cx - k, cy + k, cx - v.R * v.h, cy);
+        g.quadraticCurveTo(cx - k, cy - k, cx, cy - v.R);
+        g.fill();
+        var cg = g.createRadialGradient(cx, cy, 0, cx, cy, 4);
+        cg.addColorStop(0, "rgba(255,247,230,0.95)"); cg.addColorStop(1, "rgba(255,220,150,0)");
+        g.fillStyle = cg; g.beginPath(); g.arc(cx, cy, 4, 0, Math.PI * 2); g.fill();
+        return s;
+      });
+    })();
+    var RING = 80, slots = [], head = 0, si;
+    for (si = 0; si < RING; si++) slots.push({ x: 0, y: 0, vx: 0, vy: 0, life: 0, decay: 0.02, rot: 0, rotV: 0, spr: 0, glint: false, sz: 4 });
+    function puff(x, y, dx, dy) {
+      var p = slots[head]; head = (head + 1) % RING;              // overwrite the oldest spark
+      var glint = Math.random() < 0.12;                           // rare larger grow-shrink glints
+      p.x = x + (Math.random() - 0.5) * 5; p.y = y + (Math.random() - 0.5) * 5;
+      p.vx = dx * 0.12 + (Math.random() - 0.5) * 0.7;             // inherit a whiff of cursor velocity
+      p.vy = dy * 0.12 + (Math.random() - 0.5) * 0.7 - 0.25;
+      p.life = 1;
+      p.decay = 1 / (42 + Math.random() * 24);                    // 0.7 – 1.1 s of visible life
+      p.rot = Math.random() * Math.PI * 2;
+      p.rotV = (Math.random() - 0.5) * (glint ? 0.035 : 0.018);
+      p.spr = (Math.random() * SPK.length) | 0;
+      p.glint = glint;
+      p.sz = glint ? 5.5 + Math.random() * 2.5 : 3.2 + Math.random() * 2.4;
+    }
+    var tX = -1, tY = -1, sX = -1, sY = -1, have = false;
+    addEventListener("pointermove", function (e) { tX = e.clientX; tY = e.clientY; have = true; }, { passive: true });
+    var lastD = performance.now();
+    (function dust(now) {
+      now = now || performance.now();
+      var dt = Math.min((now - lastD) / 16.7, 3); lastD = now;
+      if (have) {
+        if (sX < 0) { sX = tX; sY = tY; }
+        var steps = 0, dx, dy, d;
+        for (;;) {
+          dx = tX - sX; dy = tY - sY; d = Math.hypot(dx, dy);
+          if (d < 7) break;
+          sX += dx * (7 / d); sY += dy * (7 / d);
+          puff(sX, sY, dx, dy);
+          if (++steps >= 24) { sX = tX; sY = tY; break; }        // pointer warped: just catch up
+        }
       }
-    });
-    (function dust() {
-      c2.clearRect(0, 0, pollen.width, pollen.height);
-      for (var i = parts.length - 1; i >= 0; i--) {
-        var p = parts[i];
-        p.x += p.vx; p.y += p.vy; p.life -= 0.02;
-        if (p.life <= 0) { parts.splice(i, 1); continue; }
-        c2.beginPath();
-        c2.fillStyle = "rgba(" + p.col + "," + p.life * 0.65 + ")";
-        c2.arc(p.x, p.y, p.r * p.life, 0, Math.PI * 2); c2.fill();
+      c2.clearRect(0, 0, innerWidth, innerHeight);
+      for (var i = 0; i < RING; i++) {
+        var p = slots[i];
+        if (p.life <= 0) continue;
+        p.life -= p.decay * dt;
+        if (p.life <= 0) { p.life = 0; continue; }
+        var age = 1 - p.life;
+        p.vx *= Math.pow(0.96, dt); p.vy = p.vy * Math.pow(0.96, dt) - 0.012 * dt;
+        p.x += p.vx * dt; p.y += p.vy * dt;
+        p.rot += p.rotV * dt;
+        var tw = 0.75 + 0.25 * Math.sin(i * 1.7 + age * 22);     // twinkle
+        var alpha = Math.min(age / 0.06, 1) * Math.pow(1 - age, 1.6) * tw;
+        // motes scale in fast; glints run the symmetric grow-shrink that reads as a twinkle
+        var sc = p.glint
+          ? Math.pow(Math.sin(Math.PI * Math.min(age, 0.999)), 0.7) * (p.sz / 24)
+          : Math.min(age / 0.15, 1) * (p.sz / 24);
+        if (sc <= 0.02 || alpha <= 0.004) continue;
+        c2.globalAlpha = Math.min(1, alpha);
+        c2.save(); c2.translate(p.x, p.y); c2.rotate(p.rot);
+        c2.drawImage(SPK[p.spr], -24 * sc, -24 * sc, 48 * sc, 48 * sc);
+        c2.restore();
       }
       requestAnimationFrame(dust);
-    })();
+    })(performance.now());
+  } else if (pollen) {
+    pollen.remove();   // no trace layer at all on touch or reduced motion
   }
 
   /* ============ magnetic 3d tilt ============ */

@@ -110,7 +110,8 @@ a:hover { text-decoration: underline; }
 }
 #gl { z-index: 0; }
 #petals { z-index: 2; pointer-events: none; }
-#pollen { position: fixed; inset: 0; pointer-events: none; z-index: 60; }
+#pollen { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 60; }
+@media (pointer: coarse) { #pollen { display: none; } }
 
 .vigil-shade {
   position: fixed;
