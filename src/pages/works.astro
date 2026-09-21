@@ -12,6 +12,8 @@ import imgSunsetFactory from "../assets/image/sunset-factory.jpg";
 
 const novels = new Map((await getCollection("works")).map((w) => [w.id.split("/").pop()!, w]));
 
+const B = (import.meta.env.BASE_URL || "/").replace(/\/$/, ""); // "" at site root, "/fduIW" on GitHub Pages
+
 const CAT_ZH = { fantasy: "幻想", illustration: "笔墨", workview: "世界观" } as const;
 const catLabelZh = (c: string) => (CAT_ZH as Record<string, string>)[c] ?? c;
 const genreOf = (tags: string[]) => tags.filter((t) => ["奇幻", "科幻", "悬疑"].includes(t))[0] || "文";
@@ -35,7 +37,7 @@ const wall: WallEntry[] = [
   { slug: "silver-age", img: imgSunsetFactory },
   { cats: ["workview"], img: imgHangzhouCoverFull, alt: "青民谱系 节录", title: "青民谱系 · 节录",
     meta: "魔王与小玖 · 世界观设定", blurb: "妖盟、青莲堂与杭城，设定同《杭城十二时辰》共享一界",
-    href: "/works/hangzhou-twelve-hours/" },
+    href: `${B}/works/hangzhou-twelve-hours/` },
 ];
 ---
 <Base lang="zh" title="花庭 · 空想花庭"
@@ -66,7 +68,7 @@ const wall: WallEntry[] = [
       if ("slug" in item) {
         const w = novels.get(item.slug)!;
         return (
-          <a class="living" data-f={w.data.cats.join(" ")} href={`/works/${w.id.split("/").pop()}/`}>
+          <a class="living" data-f={w.data.cats.join(" ")} href={`${B}/works/${w.id.split("/").pop()}/`}>
             <span class="medium-tag">{w.data.cats.map(catLabelZh).join(" · ")}</span>
             <Image src={item.img} alt={w.data.title + " 封面"} loading="lazy" decoding="async"
                    widths={[480, 960, 1600]} sizes={wallSizes} />

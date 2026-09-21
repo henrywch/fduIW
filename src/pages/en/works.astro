@@ -12,6 +12,8 @@ import imgSunsetFactory from "../../assets/image/sunset-factory.jpg";
 
 const novels = new Map((await getCollection("works")).map((w) => [w.id.split("/").pop()!, w]));
 
+const B = (import.meta.env.BASE_URL || "/").replace(/\/$/, ""); // "" at site root, "/fduIW" on GitHub Pages
+
 const EN: Record<string, { genre: string; blurb: string }> = {
   "hangzhou-twelve-hours": { genre: "Fantasy", blurb: "\"Twelve Hours of Hangzhou\" — Best Fantasy & Most Promising, 1st Fiction Festival" },
   "cyber-fortune-telling": { genre: "Sci-fi", blurb: "\"Have You Had Your Fortune Told?\" — Best Sci-fi, 1st Fiction Festival" },
@@ -41,7 +43,7 @@ const wall: WallEntry[] = [
   { slug: "silver-age", img: imgSunsetFactory },
   { cats: ["workview"], img: imgHangzhouCoverFull, alt: "Qing-min bestiary excerpt", title: "青民谱系 · 节录",
     meta: "魔王与小玖 · worldbuilding", blurb: "The Qing-min bestiary — shares a world with \"Twelve Hours of Hangzhou\"",
-    href: "/works/hangzhou-twelve-hours/" },
+    href: `${B}/works/hangzhou-twelve-hours/` },
 ];
 ---
 <Base lang="en" title="The Garden · Hortus de Escapismo"
@@ -73,7 +75,7 @@ const wall: WallEntry[] = [
         const w = novels.get(item.slug)!;
         const en = EN[w.id.split("/").pop()!];
         return (
-          <a class="living" data-f={w.data.cats.join(" ")} href={`/works/${w.id.split("/").pop()}/`}>
+          <a class="living" data-f={w.data.cats.join(" ")} href={`${B}/works/${w.id.split("/").pop()}/`}>
             <span class="medium-tag">{w.data.cats.map(catLabelEn).join(" · ")}</span>
             <Image src={item.img} alt={w.data.title} loading="lazy" decoding="async"
                    widths={[480, 960, 1600]} sizes={wallSizes} />

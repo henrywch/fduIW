@@ -16,17 +16,23 @@ interface Props {
 }
 const { lang, title, description, active, themeClass = "", headerClass = "", canvas = "none" } = Astro.props;
 
+// Base-path prefix: "" on root deploys, "/fduIW" on GitHub Pages (astro.config → base).
+const B = (import.meta.env.BASE_URL || "/").replace(/\/$/, "");
+// Astro.url.pathname may include the base prefix; strip it before locale math.
+const rawPath = Astro.url.pathname;
+const pagePath = B && rawPath.startsWith(B + "/") ? rawPath.slice(B.length) : rawPath;
+
 const S: Record<"zh" | "en", I18nStrings> = {
   zh: {
     brand: "空想花庭", navAbout: "关于", navMembers: "住客名录", navActivities: "活动志", navWorks: "花庭",
-    homeHref: "/", membersHref: "/members/", activitiesHref: "/activities/", worksHref: "/works/",
-    altLangHref: Astro.url.pathname === "/" ? "/en/" : "/en" + Astro.url.pathname, altLangLabel: "EN",
+    homeHref: `${B}/`, membersHref: `${B}/members/`, activitiesHref: `${B}/activities/`, worksHref: `${B}/works/`,
+    altLangHref: pagePath === "/" ? `${B}/en/` : `${B}/en${pagePath}`, altLangLabel: "EN",
     themeLabel: "切换昼夜",
   },
   en: {
     brand: "Hortus de Escapismo", navAbout: "About", navMembers: "Tenants", navActivities: "Chronicle", navWorks: "Garden",
-    homeHref: "/en/", membersHref: "/en/members/", activitiesHref: "/en/activities/", worksHref: "/en/works/",
-    altLangHref: Astro.url.pathname.replace(/^\/en/, "") || "/", altLangLabel: "中",
+    homeHref: `${B}/en/`, membersHref: `${B}/en/members/`, activitiesHref: `${B}/en/activities/`, worksHref: `${B}/en/works/`,
+    altLangHref: `${B}${pagePath.replace(/^\/en/, "") || "/"}`, altLangLabel: "中",
     themeLabel: "toggle day/night",
   },
 };
@@ -42,8 +48,8 @@ const brandClass = lang === "en" ? "latin" : "";
 <meta name="description" content={description}>
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F4EFE3">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#191D2A">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<link rel="stylesheet" href="/css/site.css">
+<link rel="icon" type="image/svg+xml" href={`${B}/favicon.svg`}>
+<link rel="stylesheet" href={`${B}/css/site.css`}>
 <link rel="preconnect" href="https://fonts.googleapis.cn">
 <link rel="preconnect" href="https://fonts.gstatic.cn" crossorigin>
 <link href="https://fonts.googleapis.cn/css2?family=Noto+Serif+SC:wght@400;600&family=Cormorant+Garamond:ital@0;1&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
@@ -81,6 +87,6 @@ const brandClass = lang === "en" ? "latin" : "";
 
 <slot />
 
-<script is:inline src="/js/site.js"></script>
+<script is:inline src={`${B}/js/site.js`}></script>
 </body>
 </html>

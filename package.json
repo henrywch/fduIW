@@ -11,7 +11,8 @@
     "members:lock": "node tools/members_crypt.mjs encrypt",
     "prebuild": "node tools/members_crypt.mjs decrypt || node -e \"process.exit(0)\"",
     "build": "astro build",
-    "check": "astro check"
+    "check": "astro check",
+    "deploy:gh": "node tools/deploy_gh_pages.mjs"
   },
   "dependencies": {
     "astro": "^5.13.0"

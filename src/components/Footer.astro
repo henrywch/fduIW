@@ -3,6 +3,8 @@
 interface Props { lang: "zh" | "en"; mid: "index" | "members" | "activities" | "works"; }
 const { lang, mid } = Astro.props;
 
+const B = (import.meta.env.BASE_URL || "/").replace(/\/$/, ""); // "" at site root, "/fduIW" on GitHub Pages
+
 const C = {
   zh: {
     title: "空想花庭", sub: "复旦大学空想世界创作者协会 · 同人网站",
@@ -18,13 +20,13 @@ const C = {
 
 const zhMid: Record<string, any> = {
   index: "links",
-  members: `(带着你的「空想」来——详见<a href="/">关于</a>。)`,
+  members: `(带着你的「空想」来——详见<a href="${B}/">关于</a>。)`,
   activities: "第二届小说节筹备中，企划主题将于公众号公布。",
   works: "把你的花种带来——公众号后台或社内渠道投递，由萨科塔编目上墙。",
 };
 const enMid: Record<string, any> = {
   index: "links",
-  members: `Bring your "escapism" — see <a href="/en/">About</a>.`,
+  members: `Bring your "escapism" — see <a href="${B}/en/">About</a>.`,
   activities: "The 2nd Fiction Festival is in preparation; theme to be announced on WeChat.",
   works: "Bring us your seed — via the WeChat backstage or club channels; the Sankta catalogue it onto the wall.",
 };
@@ -41,8 +43,8 @@ const mid2 = lang === "zh" ? zhMid : enMid;
       {mid2[mid] === "links" ? (
         <ul>
           {lang === "zh"
-            ? <Fragment><li><a href="/works/">花庭 · 全部作品</a></li><li><a href="/members/">住客名录</a></li><li><a href="/activities/">活动志</a></li></Fragment>
-            : <Fragment><li><a href="/en/works/">The Garden · all works</a></li><li><a href="/en/members/">The Tenants</a></li><li><a href="/en/activities/">The Chronicle</a></li></Fragment>}
+            ? <Fragment><li><a href={`${B}/works/`}>花庭 · 全部作品</a></li><li><a href={`${B}/members/`}>住客名录</a></li><li><a href={`${B}/activities/`}>活动志</a></li></Fragment>
+            : <Fragment><li><a href={`${B}/en/works/`}>The Garden · all works</a></li><li><a href={`${B}/en/members/`}>The Tenants</a></li><li><a href={`${B}/en/activities/`}>The Chronicle</a></li></Fragment>}
         </ul>
       ) : (
         <p set:html={mid2[mid]} />

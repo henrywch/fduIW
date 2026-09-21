@@ -1,6 +1,7 @@
 ---
 import Base from "../../layouts/Base.astro";
 import Footer from "../../components/Footer.astro";
+const B = (import.meta.env.BASE_URL || "/").replace(/\/$/, ""); // "" at site root, "/fduIW" on GitHub Pages
 ---
 <Base lang="en" title="Hortus de Escapismo · Fudan Imaginative World Creators' Club"
       description="Paradise stranded in the barrens, and still the flowers bloom. Unofficial site of the Fudan Imaginative World Creators' Club."
@@ -31,7 +32,7 @@ import Footer from "../../components/Footer.astro";
 
   <section class="doorway">
     <div class="door-caption">PORTA PRIMA · 住客名录</div>
-    <a class="door" href="/en/members/">
+    <a class="door" href={`${B}/en/members/`}>
       <div class="door-window-side">
         <div class="door-arch">
           <svg class="halo-mini" viewBox="0 0 74 74" aria-hidden="true"><ellipse cx="37" cy="37" rx="30" ry="11" transform="rotate(-14 37 37)"/></svg>
@@ -54,7 +55,7 @@ import Footer from "../../components/Footer.astro";
 
   <section class="doorway">
     <div class="door-caption">PORTA SECUNDA · 活动志</div>
-    <a class="door rev" href="/en/activities/">
+    <a class="door rev" href={`${B}/en/activities/`}>
       <div class="door-window-side">
         <div class="door-arch">
           <svg class="halo-mini" viewBox="0 0 74 74" aria-hidden="true"><ellipse cx="37" cy="37" rx="30" ry="11" transform="rotate(-14 37 37)"/></svg>
@@ -77,7 +78,7 @@ import Footer from "../../components/Footer.astro";
 
   <section class="doorway">
     <div class="door-caption">PORTA TERTIA · 花庭</div>
-    <a class="door" href="/en/works/">
+    <a class="door" href={`${B}/en/works/`}>
       <div class="door-window-side">
         <div class="door-arch">
           <svg class="halo-mini" viewBox="0 0 74 74" aria-hidden="true"><ellipse cx="37" cy="37" rx="30" ry="11" transform="rotate(-14 37 37)"/></svg>
@@ -99,7 +100,7 @@ import Footer from "../../components/Footer.astro";
       <p>The name borrows from the Arknights SideStory <em>Hortus de Escapismo</em>: in a wandering monastery stranded upon the barrens, its tenants still plant flowers in the cloister, day after day. We believe creation means the same — no paradise required, only a plot of flowers to live by.</p>
     </div>
     <div class="card reveal" style="margin-top:1.2rem">
-      <p>Fellow travelers: bring your "escapism". The Fiction Festival and OC exhibitions open on a yearly cycle — see the <a href="/en/activities/">Chronicle</a>; for daily life, follow the WeChat account 「空想花庭」.</p>
+      <p>Fellow travelers: bring your "escapism". The Fiction Festival and OC exhibitions open on a yearly cycle — see the <a href={`${B}/en/activities/`}>Chronicle</a>; for daily life, follow the WeChat account 「空想花庭」.</p>
     </div>
   </div>
 </div>
