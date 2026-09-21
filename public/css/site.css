@@ -558,7 +558,7 @@ a:hover { text-decoration: underline; }
   transition: border-color 0.3s;
 }
 /* .living:hover border/img-zoom/title-color gated to (hover: hover) and (pointer: fine) — see EOF zone */
-.living img { width: 100%; display: block; transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1), filter 0.5s; }
+.living img { width: 100%; height: auto; display: block; transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1), filter 0.5s; }
 .living .stem { padding: 1rem 1.1rem 1.2rem; transform: translateZ(30px); }
 .living .stem h3 { font-size: 1.12rem; color: var(--ink); margin: 0; letter-spacing: 0.05em; }
 .living .stem .meta { font-family: "JetBrains Mono", monospace; font-size: 0.66rem; letter-spacing: 0.14em; color: var(--accent); margin-top: 0.3rem; }
@@ -755,7 +755,7 @@ main { max-width: 1060px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
   border-left: 3px solid var(--hairline); margin: 1.4rem 0; padding-left: 1.2rem; color: var(--ink-soft); text-indent: 0;
 }
 .cover-rail { text-align: center; margin-bottom: 1.5rem; }
-.cover-rail img { max-width: 320px; width: 100%; border-radius: 8px; border: 1px solid var(--hairline); box-shadow: var(--shadow); }
+.cover-rail img { max-width: 320px; width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--hairline); box-shadow: var(--shadow); }
 
 /* detail pages use the slim sticky header variant */
 .detail-header { position: sticky; background: var(--header-bg); border-bottom: 1px solid var(--hairline); mix-blend-mode: normal; }
@@ -916,8 +916,10 @@ html.turn-arrive[data-theme="dark"] { background: #191D2A; }
 }
 
 /* hover was the scatter lines' only reveal — keep them readable without it */
+/* hover was the scatter lines' only reveal — touch needs *some* resting legibility,
+   but keep them ghostly: 0.7 read too solid on phones */
 @media (hover: none) {
-  .scatter { opacity: 0.7; }
+  .scatter { opacity: 0.42; }
 }
 
 /* tap targets + touch feedback + tag overflow, coarse pointers only */
