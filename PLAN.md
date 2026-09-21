@@ -2,9 +2,10 @@
 
 > **TL;DR** — Build a bilingual (Chinese-first), light/dark creative site themed on the Arknights
 > SideStory *Hortus de Escapismo* (the club's namesake): a monastery garden adrift in the barrens.
-> Content lives in Git as Markdown, ships as a static Astro site on Tencent EdgeOne Pages (fast in
-> Mainland China), and your machine acts as an offline-first sync agent that converts raw submissions
-> into content and pushes them upstream.
+> Content lives in Git as Markdown, ships as a static Astro site on Tencent EdgeOne Pages China
+> console behind a custom `.cn` domain (ICP-filed — the only route to truly fast, stable Mainland
+> access with a permanent address; ~¥40/yr for the domain, hosting stays free), and your machine acts
+> as an offline-first sync agent that converts raw submissions into content and pushes them upstream.
 
 ## Background — what "Hortus de Escapismo" is
 
@@ -181,9 +182,12 @@ The garden page is the centerpiece and must not feel like a filing cabinet.
 
 ## Deployment
 
-The hard requirement: free, safe, and reliably reachable from Mainland China, with GitHub as the
-source of truth. `*.github.io` is intermittently blocked, so GitHub Pages is the origin at best,
-not the front door.
+The hard requirement: safe and reliably reachable from Mainland China at a permanent public address,
+with GitHub as the source of truth. "Free" was relaxed to "cheapest": the platform subdomains
+(`*.edgeone.app` preview, `pages.dev`, `github.io`) are all either non-permanent, blocked, or
+dashboard-only in Mainland China, so the accepted floor is a cheap `.cn`/`.top` domain
+(~¥39–42/yr renewal at Aliyun/Tencent, per [Aliyun's 2025-12 price list](https://developer.aliyun.com/article/1691753))
+on top of free EdgeOne Pages hosting, which requires a one-time ICP 备案.
 
 ### Recommendation
 
@@ -202,10 +206,20 @@ not the front door.
    `src/pages/` (zh at root, en under `/en/`), works as a content collection fed by
    `tools/sync_works.mjs` from `assets/label/*.md` (`npm run sync:works` first — build runs it too).
    `designs/` ships under `public/designs/` as the motion lab.
-2. Custom domain (optional, ~¥30–60/yr for a `.top`/`.xyz`): point CN users at EdgeOne, or later
-   split DNS by region. Without an ICP licence stay on the free `*.edgeone.app`-style subdomain.
+2. **Custom domain + ICP 备案** (committed path): buy a `.cn` (≈¥38/42 renew) or `.top` (≈¥14/39)
+   domain at Tencent DNSPod (same console as EdgeOne; registrar + access provider alignment makes
+   备案 smoother) → domain 实名认证 → personal non-commercial ICP 备案 via Tencent's filing portal
+   (free; ~1–3 weeks) → add the domain in EdgeOne Pages China console, click-verify, managed TLS.
+   After ICP passes, 公安联网备案 at beian.mps.gov.cn within 30 days; the footer must carry both
+   filing numbers linked to beian.miit.gov.cn / beian.mps.gov.cn.
 3. HTTPS everywhere via the platform's managed certificates; enforce HSTS at the edge.
-4. All asset references relative, so the same build serves every mirror unchanged.
+4. **Interim host until the domain lands**: GitHub Pages serves the repo from the `gh-deployed`
+   branch at `https://henrywch.github.io/fduIW/` — redeploy with `npm run deploy:gh`
+   (`tools/deploy_gh_pages.mjs` rebuilds with `GH_PAGES_BASE=/fduIW/`, which switches `astro.config.mjs`
+   to `base`+`site`+`.gh-pages` outDir and publishes via a detached git index, so the working tree is
+   never touched). Because of that subpath, internal links go through
+   `import.meta.env.BASE_URL` (`${B}/…` in the layouts/pages); asset URLs from `astro:assets` and
+   `public/` are base-prefixed the same way. Root deploys see `B === ""` and are unchanged.
 
 ## Service
 
