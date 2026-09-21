@@ -1,4 +1,11 @@
 dist/
+
+# decrypted members live here; plaintext never commits
+src/content/members-local/
+
+# local key cache — MEMBERS_KEY env var is the canonical key
+tools/.members_key
+
 tools/.test/node_modules/
 tools/.test/package.json
 tools/.test/package-lock.json

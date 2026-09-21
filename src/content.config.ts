@@ -20,7 +20,7 @@ const works = defineCollection({
 // one JSON file per member — build-time typed data (no runtime DB needed for
 // a static site; this is the lightest high-performance storage there is)
 const members = defineCollection({
-  loader: glob({ pattern: "*.json", base: "./src/content/members" }),
+  loader: glob({ pattern: "*.json", base: "./src/content/members-local" }),
   schema: z.object({
     name: z.string(),
     latin: z.string().default(""),

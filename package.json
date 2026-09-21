@@ -8,6 +8,9 @@
     "build": "astro build",
     "preview": "astro preview",
     "sync:works": "node tools/sync_works.mjs",
+    "members:open": "node tools/members_crypt.mjs decrypt",
+    "members:lock": "node tools/members_crypt.mjs encrypt",
+    "build": "node tools/members_crypt.mjs decrypt || true && astro build",
     "check": "astro check"
   },
   "dependencies": {
