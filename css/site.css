@@ -78,6 +78,14 @@ body {
   overflow-x: hidden;
 }
 
+/* touch ergonomics: no blue tap-flash overlay anywhere; genuine long-press
+   selections still work (prose stays selectable) but wear the lateran gold */
+* { -webkit-tap-highlight-color: transparent; }
+::selection { background: rgba(201, 164, 92, 0.35); }
+.site-nav, .toggle-btn, .seed, .door, .living, .scatter, .scroll-cue, .brand {
+  -webkit-user-select: none; user-select: none;   /* UI chrome, not copy */
+}
+
 /* vellum grain */
 body::before {
   content: "";
@@ -935,7 +943,7 @@ html.turn-arrive[data-theme="dark"] { background: #191D2A; }
 /* tap targets + touch feedback + tag overflow, coarse pointers only */
 @media (pointer: coarse) {
   .living:active, .door:active, .seed:active, .toggle-btn:active { transform: scale(0.98); }
-  a, button, .seed { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  a, button, .seed { touch-action: manipulation; }  /* tap-flash now killed globally near body{} */
   .site-nav > a, .toggle-btn, .seed, .living.center .more, .site-footer a { position: relative; }
   /* invisible hit-area bleed: ≥36px tall targets; 44px for .close / .more */
   .site-nav > a::after, .toggle-btn::after, .seed::after, .site-footer a::after {
