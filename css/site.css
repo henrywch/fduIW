@@ -869,6 +869,8 @@ html.turn-arrive[data-theme="dark"] { background: #191D2A; }
   .dropline > span { transform: none; }
   .vigil-title .ch { opacity: 1; transform: none; }
   html { scroll-behavior: auto; }
+  /* tap-lit scatter words stay readable: no animation, just shown then hidden by JS */
+  .scatter.lit { animation: none !important; opacity: 0.85; }
 }
 
 /* ============ mobile adaptations ============================================
@@ -916,11 +918,18 @@ html.turn-arrive[data-theme="dark"] { background: #191D2A; }
   .cardfloat .close:hover { color: var(--primary); }
 }
 
-/* hover was the scatter lines' only reveal — keep them readable without it */
-/* hover was the scatter lines' only reveal — touch needs *some* resting legibility,
-   but keep them ghostly: 0.7 read too solid on phones */
+/* scatter words on touch: hidden at rest; tapping the exact spot lights the word
+   (.lit from site.js) — fully lit to 3s, fading 3s→5s, then hidden again.
+   cursor:pointer exists only so iOS Safari fires click on a non-link span. */
 @media (hover: none) {
-  .scatter { opacity: 0.42; }
+  .scatter { opacity: 0; cursor: pointer; }
+  .scatter.lit { animation: scatter-lit 5s ease forwards; }
+}
+@keyframes scatter-lit {
+  0% { opacity: 0; }
+  8% { opacity: 1; }   /* quick light-up (~0.4s) */
+  60% { opacity: 1; }  /* held fully lit through 3s */
+  100% { opacity: 0; } /* fade out during 3–5s */
 }
 
 /* tap targets + touch feedback + tag overflow, coarse pointers only */
