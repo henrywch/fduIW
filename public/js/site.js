@@ -346,7 +346,7 @@
       return k < 0.6 ? "rgba(224,192,122," : k < 0.85 ? "rgba(242,226,216," : "rgba(205,122,100,";
     }
     function spawnPetal(init, far) {
-      var r = far ? 1.8 + Math.random() * 1.8 : 3.4 + Math.random() * 3.8;
+      var r = far ? 2.4 + Math.random() * 2.4 : 4.5 + Math.random() * 5;
       return {
         far: far,
         baseX: Math.random() * innerWidth, driftX: 0,
@@ -452,6 +452,24 @@
       scramble(ticker, msgs[mi], 1200);
     }, 6000);
   }
+
+  /* ============ scatter words: tap the exact spot to light them (touch) ============
+     hidden at rest by CSS under (hover: none); .lit runs a 5s keyframe
+     (fully lit to 3s, fading 3→5s). animationend handles the normal path,
+     the timeout covers reduced-motion (animations killed, so no event). */
+  document.querySelectorAll(".scatter").forEach(function (el) {
+    var litTimer = 0;
+    el.addEventListener("click", function () {
+      el.classList.remove("lit");
+      void el.offsetWidth;                       // restart the animation on re-tap
+      el.classList.add("lit");
+      clearTimeout(litTimer);
+      litTimer = setTimeout(function () { el.classList.remove("lit"); }, 5100);
+    });
+    el.addEventListener("animationend", function (e) {
+      if (e.animationName === "scatter-lit") el.classList.remove("lit");
+    });
+  });
 
   /* ============ golden-spark cursor trail (living wall pages) ============
      baked kirakira sprites (tapered concave rays + hot core, per the lab
